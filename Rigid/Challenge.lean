@@ -228,36 +228,165 @@ end RationalDatum
 section AffinoidAlgebra
 
 variable (K : Type u) [NontriviallyNormedField K] [CompleteSpace K] [IsUltrametricDist K]
-variable (A : Type v) [NormedCommRing A] [NormedAlgebra K A] [CompleteSpace A]
-  [IsUltrametricDist A]
 
-/-- A strict `K`-affinoid algebra admits a continuous surjection from a Tate algebra in finitely
-many variables. By the Banach open mapping theorem, its given norm is then equivalent to the
-quotient norm associated to this presentation. -/
-def IsAffinoidAlgebra : Prop :=
-  ∃ (n : ℕ) (π : ContinuousAlgHom K (TateAlgebra K (Fin n)) A), Function.Surjective π
+section Algebraic
 
-/-- Unpack an affinoid algebra as a surjective presentation by a finite Tate algebra. -/
+variable (A : Type v) [CommRing A] [Algebra K A]
+
+/-- A presentation of a strict affinoid algebra as a quotient of a finite Tate algebra. -/
+structure AffinoidPresentation
+    (K : Type u) [NontriviallyNormedField K] [CompleteSpace K] [IsUltrametricDist K]
+    (A : Type v) [CommRing A] [Algebra K A] where
+  n : ℕ
+  ideal : Ideal (TateAlgebra K (Fin n))
+  equiv : (TateAlgebra K (Fin n) ⧸ ideal) ≃ₐ[K] A
+
+namespace AffinoidPresentation
+
+/-- The surjective algebra homomorphism associated with an affinoid presentation. -/
+noncomputable def toAlgHom (P : AffinoidPresentation K A) :
+    TateAlgebra K (Fin P.n) →ₐ[K] A :=
+  P.equiv.toAlgHom.comp (Ideal.Quotient.mkₐ K P.ideal)
+
+/-- The algebra homomorphism associated with an affinoid presentation is surjective. -/
+theorem toAlgHom_surjective (P : AffinoidPresentation K A) :
+    Function.Surjective P.toAlgHom := sorry
+
+/-- The quotient topology transported to the target of an affinoid presentation. -/
+@[reducible]
+noncomputable def residueTopology (P : AffinoidPresentation K A) : TopologicalSpace A :=
+  TopologicalSpace.coinduced P.toAlgHom inferInstance
+
+/-- The quotient topology of an affinoid algebra is independent of its presentation. -/
+theorem residueTopology_eq (P Q : AffinoidPresentation K A) :
+    P.residueTopology = Q.residueTopology := sorry
+
+/-- The quotient topology makes the target a topological ring. -/
+theorem residueIsTopologicalRing (P : AffinoidPresentation K A) :
+    @IsTopologicalRing A P.residueTopology _ := sorry
+
+/-- Scalar multiplication by the ground field is continuous for the quotient topology. -/
+theorem residueContinuousSMul (P : AffinoidPresentation K A) :
+    @ContinuousSMul K A _ _ P.residueTopology := sorry
+
+/-- The residue norm associated with an affinoid presentation, bundled as a normed commutative ring
+structure. Unlike the induced topology, this norm can depend on the presentation. -/
+@[reducible]
+noncomputable def residueNormedCommRing (P : AffinoidPresentation K A) :
+    NormedCommRing A := sorry
+
+/-- The residue norm makes the target a normed algebra over the ground field. -/
+@[reducible]
+noncomputable def residueNormedAlgebra (P : AffinoidPresentation K A) :
+    letI := P.residueNormedCommRing
+    NormedAlgebra K A := sorry
+
+/-- The residue norm is complete. -/
+theorem residueCompleteSpace (P : AffinoidPresentation K A) :
+    letI := P.residueNormedCommRing
+    CompleteSpace A := sorry
+
+/-- The residue norm is nonarchimedean. -/
+theorem residueIsUltrametricDist (P : AffinoidPresentation K A) :
+    letI := P.residueNormedCommRing
+    IsUltrametricDist A := sorry
+
+/-- The metric topology of the residue norm is the quotient topology. -/
+theorem residueNormedCommRing_topology_eq (P : AffinoidPresentation K A) :
+    (letI := P.residueNormedCommRing
+     inferInstance : TopologicalSpace A) = P.residueTopology := sorry
+
+/-- The presentation map gives the target its exact quotient norm when the residue norm is used. -/
+theorem isQuotientNorm_toAlgHom (P : AffinoidPresentation K A) :
+    letI := P.residueNormedCommRing
+    IsQuotientNorm (P.toAlgHom : TateAlgebra K (Fin P.n) → A) := sorry
+
+end AffinoidPresentation
+
+/-- A strict `K`-affinoid algebra is a `K`-algebra isomorphic to a quotient of a Tate algebra in
+finitely many variables. No norm or topology on the algebra is part of this predicate. -/
+def IsAffinoidAlgebra
+    (K : Type u) [NontriviallyNormedField K] [CompleteSpace K] [IsUltrametricDist K]
+    (A : Type v) [CommRing A] [Algebra K A] : Prop :=
+  Nonempty (AffinoidPresentation K A)
+
+namespace IsAffinoidAlgebra
+
+/-- Choose a quotient presentation of an affinoid algebra. -/
+noncomputable def presentation (hA : IsAffinoidAlgebra K A) : AffinoidPresentation K A :=
+  Classical.choice hA
+
+end IsAffinoidAlgebra
+
+/-- The canonical topology of an affinoid algebra, obtained from any quotient presentation. -/
+@[reducible]
+noncomputable def affinoidTopology (hA : IsAffinoidAlgebra K A) : TopologicalSpace A :=
+  hA.presentation.residueTopology
+
+/-- The canonical topology makes an affinoid algebra a topological ring. -/
+theorem affinoidIsTopologicalRing (hA : IsAffinoidAlgebra K A) :
+    @IsTopologicalRing A (affinoidTopology K A hA) _ := sorry
+
+/-- Scalar multiplication by the ground field is continuous for the canonical topology. -/
+theorem affinoidContinuousSMul (hA : IsAffinoidAlgebra K A) :
+    @ContinuousSMul K A _ _ (affinoidTopology K A hA) := sorry
+
+/-- The canonical topology agrees with the quotient topology from every presentation. -/
+theorem affinoidTopology_eq_residueTopology (hA : IsAffinoidAlgebra K A)
+    (P : AffinoidPresentation K A) : affinoidTopology K A hA = P.residueTopology := sorry
+
+/-- Algebra homomorphisms between affinoid algebras are continuous for their canonical quotient
+topologies. -/
+theorem continuous_for_affinoidTopology_of_isAffinoidAlgebra
+    {A : Type v} [CommRing A] [Algebra K A]
+    {B : Type w} [CommRing B] [Algebra K B]
+    (hA : IsAffinoidAlgebra K A) (hB : IsAffinoidAlgebra K B) (f : A →ₐ[K] B) :
+    @Continuous A B (affinoidTopology K A hA) (affinoidTopology K B hB) f := sorry
+
+/-- Unpack an affinoid algebra as a surjective algebraic presentation by a finite Tate algebra. -/
 theorem exists_surjective_presentation_of_isAffinoidAlgebra (hA : IsAffinoidAlgebra K A) :
-    ∃ (n : ℕ) (π : ContinuousAlgHom K (TateAlgebra K (Fin n)) A), Function.Surjective π :=
-  hA
+    ∃ (n : ℕ) (π : TateAlgebra K (Fin n) →ₐ[K] A), Function.Surjective π := sorry
 
-/-- The norm of an affinoid algebra is equivalent to the quotient norm induced by a finite Tate
-algebra presentation. -/
-theorem exists_equivalent_quotientNorm_presentation_of_isAffinoidAlgebra
-    (hA : IsAffinoidAlgebra K A) :
-    ∃ (n : ℕ) (π : ContinuousAlgHom K (TateAlgebra K (Fin n)) A),
-      IsEquivalentQuotientNorm (π : TateAlgebra K (Fin n) → A) := sorry
-
-/-- Every algebra homomorphism between strict affinoid algebras is continuous. -/
-theorem continuous_of_isAffinoidAlgebra
-    {B : Type w} [NormedCommRing B] [NormedAlgebra K B] [CompleteSpace B]
-    [IsUltrametricDist B] (hA : IsAffinoidAlgebra K A) (hB : IsAffinoidAlgebra K B)
-    (f : A →ₐ[K] B) : Continuous f := sorry
+/-- Unpack the defining quotient presentation of an affinoid algebra. -/
+theorem exists_quotient_presentation_of_isAffinoidAlgebra (hA : IsAffinoidAlgebra K A) :
+    ∃ (n : ℕ) (I : Ideal (TateAlgebra K (Fin n))),
+      Nonempty ((TateAlgebra K (Fin n) ⧸ I) ≃ₐ[K] A) := sorry
 
 /-- Affinoid algebras are Noetherian. -/
 theorem isNoetherianRing_of_isAffinoidAlgebra (hA : IsAffinoidAlgebra K A) :
     IsNoetherianRing A := sorry
+
+end Algebraic
+
+section BanachRealization
+
+/-- Any complete nonarchimedean normed-algebra topology on an affinoid algebra agrees with its
+canonical quotient topology. -/
+theorem topology_eq_affinoidTopology_of_isAffinoidAlgebra
+    (A : Type v) [NormedCommRing A] [NormedAlgebra K A] [CompleteSpace A]
+    [IsUltrametricDist A] (hA : IsAffinoidAlgebra K A) :
+    (inferInstance : TopologicalSpace A) = affinoidTopology K A hA := sorry
+
+/-- The norm of an affinoid algebra is equivalent to the quotient norm induced by a finite Tate
+algebra presentation. -/
+theorem exists_equivalent_quotientNorm_presentation_of_isAffinoidAlgebra
+    (A : Type v) [NormedCommRing A] [NormedAlgebra K A] [CompleteSpace A]
+    [IsUltrametricDist A] (hA : IsAffinoidAlgebra K A) :
+    ∃ (n : ℕ) (π : ContinuousAlgHom K (TateAlgebra K (Fin n)) A),
+      IsEquivalentQuotientNorm (π : TateAlgebra K (Fin n) → A) := sorry
+
+/-- Every algebra homomorphism between complete normed realizations of strict affinoid algebras is
+continuous. -/
+theorem continuous_of_isAffinoidAlgebra
+    {A : Type v} [NormedCommRing A] [NormedAlgebra K A] [CompleteSpace A]
+    [IsUltrametricDist A] {B : Type w} [NormedCommRing B] [NormedAlgebra K B]
+    [CompleteSpace B] [IsUltrametricDist B] (hA : IsAffinoidAlgebra K A)
+    (hB : IsAffinoidAlgebra K B) (f : A →ₐ[K] B) : Continuous f := sorry
+
+end BanachRealization
+
+variable (A : Type v) [NormedCommRing A] [NormedAlgebra K A] [CompleteSpace A]
+  [IsUltrametricDist A]
 
 /-- A rational localization `A⟨T₁, ..., Tₙ⟩ / (gTᵢ - fᵢ)`.
 
