@@ -12,8 +12,9 @@ The first pass will treat a complete nontrivially normed field `K` with
   available.
 - `Rigid/Challenge.lean` is a standalone specification file. It has only mathlib imports and keeps
   all target declarations independent of the implementation import graph.
-- `Rigid/Development.lean` mirrors the challenge but may import project modules. Implemented
-  declarations are removed from this copy, so its remaining `sorry`s measure development progress.
+- `Rigid/Development.lean` mirrors the complete challenge declaration list in namespace
+  `RigidChallenge` but may import project modules. Its declaration bodies are replaced with
+  production terms and proofs as those become available.
 
 This deliberately postpones non-strict polyradii, trivially valued fields, adic spaces, and general
 Huber pairs.
@@ -126,10 +127,10 @@ Rigid/
 ```
 
 Keep the implementation split by dependency. The root module imports `Development.lean`, while the
-challenge file remains a separately checked, mathlib-only specification. The two files may repeat
-declaration names because their import graphs are never combined. As each declaration is
-implemented, import its production module from `Development.lean` and remove its sorried duplicate
-there.
+challenge file remains a separately checked, mathlib-only specification. Production declarations
+use namespace `Rigid`; both comparator files use `RigidChallenge`. Their declaration lists must stay
+identical. As each declaration is implemented, import its production module from Development and
+replace only the corresponding sorried Development body.
 
 ## Near-term milestone
 

@@ -2,13 +2,14 @@ import Mathlib
 import Rigid.TateAlgebra.GaussNorm
 
 set_option linter.style.header false
+set_option linter.unusedSectionVars false
 
 /-!
-# Rigid analytic geometry development targets
+# Rigid analytic geometry challenge
 
-This file is the implementation-facing copy of `Rigid.Challenge`. Unlike the challenge file, it may
-import project modules. As declarations are implemented elsewhere, their sorried copies are removed
-from this file while the remaining targets continue to compile.
+This declaration block is the target interface for a first formalization of rigid and Berkovich
+analytic geometry. The Challenge module imports only mathlib; its Development counterpart may add
+project imports while preserving the same declarations in namespace `RigidChallenge`.
 
 We first work over a complete, nontrivially normed, nonarchimedean field and with *strict* affinoid
 algebras. The intended construction order is:
@@ -30,7 +31,7 @@ open scoped Topology
 
 universe u v w
 
-namespace Rigid
+namespace RigidChallenge
 
 /-! ## Tate algebras -/
 
@@ -39,19 +40,45 @@ section TateAlgebra
 variable (K : Type u) [NontriviallyNormedField K] [IsUltrametricDist K]
 variable (ι : Type v)
 
-/- The underlying ring, constants, variables, coefficients, algebra structure, and Gauss norm are
-implemented in `Rigid.TateAlgebra.Basic` and `Rigid.TateAlgebra.GaussNorm`. -/
+/-- The underlying ring of the strict Tate algebra in variables indexed by `ι`.
+
+Mathlib's restricted multivariate power series already give the correct underlying set: the
+coefficients tend to zero along the cofinite filter. The missing work is the Gauss norm and its
+analytic properties. The main development will initially assume that `ι` is finite. -/
+abbrev TateAlgebra :=
+  ↥(MvPowerSeries.IsRestricted.subring (R := K) (fun _ : ι ↦ (1 : ℝ)))
+
+/-- The coordinate corresponding to a variable of the Tate algebra. -/
+noncomputable def tateVariable (i : ι) : TateAlgebra K ι :=
+  Rigid.tateVariable K ι i
+
+/-- The Gauss norm, i.e. the supremum of the norms of the coefficients. -/
+noncomputable def gaussNorm : TateAlgebra K ι → ℝ :=
+  Rigid.gaussNorm K ι
+
+noncomputable instance tateAlgebraNorm : Norm (TateAlgebra K ι) :=
+  ⟨gaussNorm K ι⟩
 
 noncomputable instance tateAlgebraNormedCommRing : NormedCommRing (TateAlgebra K ι) := sorry
+
+noncomputable instance tateAlgebraAlgebra : Algebra K (TateAlgebra K ι) :=
+  Rigid.tateAlgebraAlgebra K ι
 
 noncomputable instance tateAlgebraNormedAlgebra : NormedAlgebra K (TateAlgebra K ι) := sorry
 
 noncomputable instance tateAlgebraIsUltrametricDist : IsUltrametricDist (TateAlgebra K ι) := sorry
 
-variable [Finite ι]
+variable [hι : Finite ι]
+
+include hι
 
 noncomputable instance tateAlgebraComplete [CompleteSpace K] : CompleteSpace (TateAlgebra K ι) :=
   sorry
+
+/-- The Gauss norm is the supremum norm on coefficients. -/
+theorem norm_eq_sSup_coeff (f : TateAlgebra K ι) :
+    ‖f‖ = sSup (Set.range fun n : ι →₀ ℕ ↦ ‖MvPowerSeries.coeff n f.1‖) :=
+  Rigid.norm_eq_sSup_coeff K ι f
 
 /-- The Gauss norm is multiplicative over a nonarchimedean field. -/
 theorem norm_mul (f g : TateAlgebra K ι) : ‖f * g‖ = ‖f‖ * ‖g‖ := sorry
@@ -238,4 +265,4 @@ theorem separated_iff_hausdorff (X : ComparisonRigidSpace K) :
 
 end GlobalSpaces
 
-end Rigid
+end RigidChallenge

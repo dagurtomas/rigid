@@ -1,13 +1,14 @@
 import Mathlib
 
 set_option linter.style.header false
+set_option linter.unusedSectionVars false
 
 /-!
 # Rigid analytic geometry challenge
 
-This file is the target interface for a first formalization of rigid and Berkovich analytic
-geometry. It imports only mathlib and is expected to compile while the declarations below still
-contain `sorry`.
+This declaration block is the target interface for a first formalization of rigid and Berkovich
+analytic geometry. The Challenge module imports only mathlib; its Development counterpart may add
+project imports while preserving the same declarations in namespace `RigidChallenge`.
 
 We first work over a complete, nontrivially normed, nonarchimedean field and with *strict* affinoid
 algebras. The intended construction order is:
@@ -29,7 +30,7 @@ open scoped Topology
 
 universe u v w
 
-namespace Rigid
+namespace RigidChallenge
 
 /-! ## Tate algebras -/
 
@@ -63,7 +64,9 @@ noncomputable instance tateAlgebraNormedAlgebra : NormedAlgebra K (TateAlgebra K
 
 noncomputable instance tateAlgebraIsUltrametricDist : IsUltrametricDist (TateAlgebra K ι) := sorry
 
-variable [Finite ι]
+variable [hι : Finite ι]
+
+include hι
 
 noncomputable instance tateAlgebraComplete [CompleteSpace K] : CompleteSpace (TateAlgebra K ι) :=
   sorry
@@ -257,4 +260,4 @@ theorem separated_iff_hausdorff (X : ComparisonRigidSpace K) :
 
 end GlobalSpaces
 
-end Rigid
+end RigidChallenge

@@ -4,8 +4,9 @@ A Lean/mathlib formalization project for rigid analytic geometry, including Tate
 algebras, rigid spaces, Berkovich spaces, and their comparison.
 
 The standalone mathlib-only specification is [`Rigid/Challenge.lean`](Rigid/Challenge.lean). The
-implementation-facing copy is [`Rigid/Development.lean`](Rigid/Development.lean); it imports project
-modules and drops sorried declarations as they are implemented. See [`PLAN.md`](PLAN.md) for the
+implementation-facing comparator copy is [`Rigid/Development.lean`](Rigid/Development.lean). Both
+contain the same declarations in namespace `RigidChallenge`; Development imports project modules and
+replaces sorried bodies as implementations become available. See [`PLAN.md`](PLAN.md) for the
 dependency order, scope decisions, and open questions around the precise comparison theorem.
 
 ## GitHub configuration
