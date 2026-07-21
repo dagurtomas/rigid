@@ -81,9 +81,13 @@ theorem norm_mul (f g : TateAlgebra K ι) : ‖f * g‖ = ‖f‖ * ‖g‖ := s
 /-- The universal property of the strict Tate algebra.
 
 A tuple in the closed unit polydisc of a complete nonarchimedean Banach `K`-algebra determines a
-unique continuous `K`-algebra homomorphism. -/
+unique continuous `K`-algebra homomorphism.
+
+The codomain is `NormedCommRing` rather than `SeminormedCommRing`: Hausdorffness is needed for
+uniqueness, since a continuous algebra homomorphism into a merely seminormed codomain is not
+determined by its values on the coordinates. -/
 theorem existsUnique_continuousAlgHom_of_norm_le_one [CompleteSpace K]
-    {A : Type w} [SeminormedCommRing A] [NormedAlgebra K A] [CompleteSpace A]
+    {A : Type w} [NormedCommRing A] [NormedAlgebra K A] [CompleteSpace A]
     [IsUltrametricDist A] (x : ι → A) (hx : ∀ i, ‖x i‖ ≤ 1) :
     ∃! φ : ContinuousAlgHom K (TateAlgebra K ι) A,
       ∀ i, φ (tateVariable K ι i) = x i := sorry
