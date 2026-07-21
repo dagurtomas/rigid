@@ -8,17 +8,20 @@ import Rigid.TateAlgebra.UniversalProperty
 set_option linter.style.header false
 
 /-!
-# Noether normalization for affinoid residue fields
+# Noether normalization for affinoid algebras
 
-This file proves the affinoid Nullstellensatz consequence of Noether normalization: an affinoid
-algebra which is a field is finite-dimensional over its ground field.  The proof follows Kato,
-*Introduction to Rigid Geometry*, Corollary 1.4.9, and Corollary 4.3.14 of the cited draft notes.
+This file proves Noether normalization for a nonzero affinoid algebra: it is finite over an
+injectively embedded Tate algebra in finitely many variables.  The proof follows Kato,
+*Introduction to Rigid Geometry*, Theorem 1.4.5, and Corollary 4.3.14 of the cited draft notes.
+As a consequence it proves the affinoid Nullstellensatz: an affinoid algebra which is a field is
+finite-dimensional over its ground field (Kato, Corollary 1.4.9).
 
 The normalization argument is organized as an induction on the number of variables in a
 surjective Tate-algebra presentation.  A triangular change of coordinates makes a nonzero
 relation distinguished in the first variable.  The Tate-algebra division theorem then shows that
-the target is finite over the image of the Tate algebra in the remaining variables.  That image
-is again a field, so induction applies.
+the target is finite over the image of the Tate algebra in the remaining variables.  Applying the
+induction hypothesis to that image and composing the resulting finite injective maps gives the
+normalization.
 -/
 
 open Filter
@@ -655,70 +658,76 @@ private theorem finite_comp_succMap_of_leadingDegree_eq_single_zero {n d : ℕ}
 
 end FiniteStep
 
-/-! ## The affinoid Nullstellensatz -/
+/-! ## Noether normalization and the affinoid Nullstellensatz -/
 
-/-- A field which is a quotient of a finite Tate algebra is finite over the ground field. -/
-private theorem finite_of_surjective_tateAlgebra_of_isField (n : ℕ) :
-    ∀ {A : Type v} [CommRing A] [Algebra K A], IsField A →
-      ∀ φ : TateAlgebra K (Fin n) →ₐ[K] A, Function.Surjective φ → Module.Finite K A := by
+/-- The zero-variable Tate algebra is one-dimensional over the ground field. -/
+private theorem finite_tateAlgebra_fin_zero : Module.Finite K (TateAlgebra K (Fin 0)) := by
+  apply Module.Finite.of_surjective (Algebra.linearMap K (TateAlgebra K (Fin 0)))
+  intro f
+  refine ⟨MvPowerSeries.coeff 0 f.1, ?_⟩
+  apply Subtype.ext
+  ext μ
+  have hμ : μ = 0 := Subsingleton.elim _ _
+  subst μ
+  simp [algebraMap_apply]
+
+/-- Algebraic form of Noether normalization for a quotient of a finite Tate algebra. -/
+private theorem exists_finite_injective_tateAlgebra_of_surjective (n : ℕ) :
+    ∀ {A : Type v} [CommRing A] [Algebra K A] [Nontrivial A]
+      (π : TateAlgebra K (Fin n) →ₐ[K] A), Function.Surjective π →
+      ∃ (d : ℕ) (ι : TateAlgebra K (Fin d) →ₐ[K] A),
+        Function.Injective ι ∧ ι.Finite := by
   induction n with
   | zero =>
-      intro A _ _ hA φ hφ
-      have hTate : Module.Finite K (TateAlgebra K (Fin 0)) := by
-        apply Module.Finite.of_surjective
-          (Algebra.linearMap K (TateAlgebra K (Fin 0)))
-        intro f
-        refine ⟨MvPowerSeries.coeff 0 f.1, ?_⟩
+      intro A _ _ _ π hπ
+      have hscalar (f : TateAlgebra K (Fin 0)) :
+          algebraMap K (TateAlgebra K (Fin 0)) (MvPowerSeries.coeff 0 f.1) = f := by
         apply Subtype.ext
         ext μ
         have hμ : μ = 0 := Subsingleton.elim _ _
         subst μ
         simp [algebraMap_apply]
-      letI := hTate
-      exact Module.Finite.of_surjective φ.toLinearMap hφ
+      have hπinj : Function.Injective π := by
+        intro f g hfg
+        have hfg' := hfg
+        rw [← hscalar f, ← hscalar g] at hfg'
+        rw [π.commutes, π.commutes] at hfg'
+        have hcoeff := FaithfulSMul.algebraMap_injective K A hfg'
+        calc
+          f = algebraMap K (TateAlgebra K (Fin 0)) (MvPowerSeries.coeff 0 f.1) :=
+            (hscalar f).symm
+          _ = algebraMap K (TateAlgebra K (Fin 0)) (MvPowerSeries.coeff 0 g.1) :=
+            congrArg _ hcoeff
+          _ = g := hscalar g
+      exact ⟨0, π, hπinj, AlgHom.Finite.of_surjective π hπ⟩
   | succ n ih =>
-      intro A _ _ hA φ hφ
-      by_cases hker : RingHom.ker φ = ⊥
-      · have hφinj : Function.Injective φ :=
-          (RingHom.injective_iff_ker_eq_bot φ).mpr hker
-        letI : Field A := hA.toField
-        let X₀ := tateVariable K (Fin (n + 1)) 0
-        have hX₀ : X₀ ≠ 0 := by
-          rw [← norm_ne_zero_iff, norm_tateVariable]
-          exact one_ne_zero
-        have hφX₀ : φ X₀ ≠ 0 := by simpa using hφinj.ne hX₀
-        obtain ⟨y, hy⟩ := hφ ((φ X₀)⁻¹)
-        have hX₀y : X₀ * y = 1 := by
-          apply hφinj
-          simp [hy, hφX₀]
-        have hconst := congrArg
-          (fun z : TateAlgebra K (Fin (n + 1)) ↦ MvPowerSeries.constantCoeff z.1) hX₀y
-        have : (0 : K) = 1 := by
-          simpa [X₀] using hconst
-        exact ((zero_ne_one : (0 : K) ≠ 1) this).elim
+      intro A _ _ _ π hπ
+      by_cases hker : RingHom.ker π = ⊥
+      · exact ⟨n + 1, π, (RingHom.injective_iff_ker_eq_bot π).mpr hker,
+          AlgHom.Finite.of_surjective π hπ⟩
       · obtain ⟨g, hg, hg0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot
-          (p := RingHom.ker φ) hker
+          (p := RingHom.ker π) hker
         obtain ⟨p, d, hgd⟩ := exists_tateShear_leadingDegree_eq_single_zero K g hg0
         let ψ : ContinuousAlgHom K (TateAlgebra K (Fin (n + 1)))
             (TateAlgebra K (Fin (n + 1))) := tateShear K p 1 (by simp)
         let ψinv : ContinuousAlgHom K (TateAlgebra K (Fin (n + 1)))
             (TateAlgebra K (Fin (n + 1))) := tateShear K p (-1) (by simp)
         let g' := ψ g
-        let φ' : TateAlgebra K (Fin (n + 1)) →ₐ[K] A :=
-          φ.comp (ψinv : TateAlgebra K (Fin (n + 1)) →ₐ[K]
+        let π' : TateAlgebra K (Fin (n + 1)) →ₐ[K] A :=
+          π.comp (ψinv : TateAlgebra K (Fin (n + 1)) →ₐ[K]
             TateAlgebra K (Fin (n + 1)))
         have hψinvψ (z : TateAlgebra K (Fin (n + 1))) : ψinv (ψ z) = z := by
           simpa [ψ, ψinv] using
             (tateShear_comp_neg K p (-1) (by simp) (by simp) z)
-        have hφ' : Function.Surjective φ' := by
+        have hπ' : Function.Surjective π' := by
           intro a
-          obtain ⟨z, hz⟩ := hφ a
+          obtain ⟨z, hz⟩ := hπ a
           refine ⟨ψ z, ?_⟩
-          change φ (ψinv (ψ z)) = a
+          change π (ψinv (ψ z)) = a
           rw [hψinvψ]
           exact hz
-        have hg' : g' ∈ RingHom.ker φ' := by
-          change φ (ψinv (ψ g)) = 0
+        have hg' : g' ∈ RingHom.ker π' := by
+          change π (ψinv (ψ g)) = 0
           rw [hψinvψ]
           exact hg
         have hg'0 : g' ≠ 0 := by
@@ -731,20 +740,16 @@ private theorem finite_of_surjective_tateAlgebra_of_isField (n : ℕ) :
         have hgd' : leadingDegree (MonomialOrder.lex : MonomialOrder (Fin (n + 1))) g' =
             Finsupp.single 0 d := by
           simpa [g', ψ] using hgd
-        let h : TateAlgebra K (Fin n) →ₐ[K] A := φ'.comp (succMap K n)
-        have hhfinite : h.Finite := by
-          exact finite_comp_succMap_of_leadingDegree_eq_single_zero K φ' hφ' g' hg' hg'0 hgd'
+        let h : TateAlgebra K (Fin n) →ₐ[K] A := π'.comp (succMap K n)
+        have hhfinite : h.Finite :=
+          finite_comp_succMap_of_leadingDegree_eq_single_zero K π' hπ' g' hg' hg'0 hgd'
         let C : Subalgebra K A := h.range
         have hvalfinite : (Subalgebra.val C).Finite := by
           apply AlgHom.Finite.of_comp_finite (f := h.rangeRestrict)
           simpa [C] using hhfinite
-        letI : Module.Finite C A := hvalfinite
-        have hCfield : IsField C :=
-          isField_of_isIntegral_of_isField Subtype.val_injective hA
-        have hCfinite : Module.Finite K C :=
-          ih hCfield h.rangeRestrict h.rangeRestrict_surjective
-        letI := hCfinite
-        exact Module.Finite.trans C A
+        obtain ⟨e, ι, hιinj, hιfinite⟩ := ih h.rangeRestrict h.rangeRestrict_surjective
+        refine ⟨e, (Subalgebra.val C).comp ι, Subtype.val_injective.comp hιinj, ?_⟩
+        exact AlgHom.Finite.comp hvalfinite hιfinite
 
 end Slices
 
@@ -768,12 +773,51 @@ theorem IsAffinoidAlgebra.quotient (hA : IsAffinoidAlgebra K A) (I : Ideal A) :
       ideal := RingHom.ker g
       equiv := Ideal.quotientKerAlgEquivOfSurjective hg }⟩
 
+/-- **Noether normalization for affinoid algebras.** A nonzero affinoid algebra admits an
+injective homomorphism from a Tate algebra in finitely many variables and is finite as an algebra
+over that Tate algebra. -/
+theorem exists_finite_injective_tateAlgebra_of_isAffinoidAlgebra [Nontrivial A]
+    (hA : IsAffinoidAlgebra K A) :
+    ∃ (d : ℕ) (ι : TateAlgebra K (Fin d) →ₐ[K] A), Function.Injective ι ∧ ι.Finite := by
+  obtain ⟨n, π, hπ⟩ := exists_surjective_presentation_of_isAffinoidAlgebra K A hA
+  exact TateAlgebra.exists_finite_injective_tateAlgebra_of_surjective K n π hπ
+
 /-- **Affinoid Nullstellensatz.** An affinoid algebra which is a field is a finite-dimensional
 algebra over the ground field. -/
 theorem finite_of_isField_of_isAffinoidAlgebra (hA : IsAffinoidAlgebra K A)
     (hfield : IsField A) : Module.Finite K A := by
-  obtain ⟨n, φ, hφ⟩ := exists_surjective_presentation_of_isAffinoidAlgebra K A hA
-  exact TateAlgebra.finite_of_surjective_tateAlgebra_of_isField K n hfield φ hφ
+  letI : Field A := hfield.toField
+  obtain ⟨d, ι, hιinj, hιfinite⟩ :=
+    exists_finite_injective_tateAlgebra_of_isAffinoidAlgebra K hA
+  have hTateField : IsField (TateAlgebra K (Fin d)) := by
+    letI : Algebra (TateAlgebra K (Fin d)) A := ι.toRingHom.toAlgebra
+    letI : Module.Finite (TateAlgebra K (Fin d)) A := hιfinite
+    exact isField_of_isIntegral_of_isField hιinj hfield
+  have hd : d = 0 := by
+    cases d with
+    | zero => rfl
+    | succ d =>
+        exfalso
+        letI : Field (TateAlgebra K (Fin (d + 1))) := hTateField.toField
+        let X₀ := tateVariable K (Fin (d + 1)) 0
+        have hX₀ : X₀ ≠ 0 := by
+          rw [← norm_ne_zero_iff, norm_tateVariable]
+          exact one_ne_zero
+        have hX₀inv : X₀ * X₀⁻¹ = 1 := mul_inv_cancel₀ hX₀
+        have hconst := congrArg
+          (fun z : TateAlgebra K (Fin (d + 1)) ↦ MvPowerSeries.constantCoeff z.1) hX₀inv
+        have : (0 : K) = 1 := by
+          simpa [X₀] using hconst
+        exact (zero_ne_one : (0 : K) ≠ 1) this
+  subst d
+  let κ : K →ₐ[K] TateAlgebra K (Fin 0) := Algebra.ofId K (TateAlgebra K (Fin 0))
+  have hκfin : κ.Finite := by
+    exact TateAlgebra.finite_tateAlgebra_fin_zero K
+  have hcomp : (ι.comp κ).Finite := AlgHom.Finite.comp hιfinite hκfin
+  have hcomp_eq : ι.comp κ = Algebra.ofId K A := by ext
+  rw [hcomp_eq] at hcomp
+  change (algebraMap K A).Finite at hcomp
+  exact RingHom.finite_algebraMap.mp hcomp
 
 end AffinoidNullstellensatz
 
