@@ -49,6 +49,14 @@ quotient norm; `exists_equivalent_quotientNorm_presentation_of_isAffinoidAlgebra
 consequence. `IsQuotientNorm` remains available for presentations whose chosen norm is exactly the
 fiberwise infimum.
 
+The rational-localization interface follows the unit-radius construction
+`A⟨T₁, ..., Tₙ⟩ / (gTᵢ - fᵢ)`. `IsRationalDatum g f` records that `g` and the `fᵢ` generate the unit
+ideal. Coordinates are required to be power-bounded rather than to have norm at most one, so the
+universal property is unchanged when the admissible Banach norm is replaced by an equivalent norm.
+The API exposes the canonical base map, coordinates and their relations, invertibility of the
+denominator for rational data, the continuous universal mapping property, and preservation of the
+affinoid condition.
+
 ### 3. Affinoid geometry
 
 1. Define rational domains and rational coverings.

@@ -1,5 +1,6 @@
 import Mathlib
 import Rigid.AffinoidAlgebra.QuotientNorm
+import Rigid.AffinoidAlgebra.RationalDatum
 import Rigid.TateAlgebra.GaussNorm
 
 set_option linter.style.header false
@@ -210,6 +211,35 @@ theorem isEquivalentQuotientNorm_continuousAlgHom_iff_surjective
 
 end OpenMapping
 
+section RationalDatum
+
+/-- An element of a seminormed ring is power-bounded if the norms of all its nonnegative powers
+have a common upper bound. -/
+def IsPowerBounded {B : Type v} [SeminormedRing B] (x : B) : Prop :=
+  Rigid.IsPowerBounded x
+
+/-- An element of norm at most one is power-bounded. -/
+theorem isPowerBounded_of_norm_le_one {B : Type v} [SeminormedRing B] {x : B}
+    (hx : ‖x‖ ≤ 1) : IsPowerBounded x :=
+  Rigid.isPowerBounded_of_norm_le_one hx
+
+@[simp]
+theorem isPowerBounded_zero {B : Type v} [SeminormedRing B] :
+    IsPowerBounded (0 : B) :=
+  Rigid.isPowerBounded_zero
+
+@[simp]
+theorem isPowerBounded_one {B : Type v} [SeminormedRing B] :
+    IsPowerBounded (1 : B) :=
+  Rigid.isPowerBounded_one
+
+/-- The numerator and denominator of a rational localization form a rational datum when together
+they generate the unit ideal. -/
+def IsRationalDatum {A : Type v} [CommRing A] {n : ℕ} (g : A) (f : Fin n → A) : Prop :=
+  Rigid.IsRationalDatum g f
+
+end RationalDatum
+
 /-! ## Affinoid algebras and affinoid spectra -/
 
 section AffinoidAlgebra
@@ -260,6 +290,121 @@ noncomputable instance rationalLocalizationNormedCommRing (n : ℕ) (g : A) (f :
 
 noncomputable instance rationalLocalizationAlgebra (n : ℕ) (g : A) (f : Fin n → A) :
     Algebra A (RationalLocalization K A n g f) := sorry
+
+noncomputable instance rationalLocalizationNormedAlgebra (n : ℕ) (g : A) (f : Fin n → A) :
+    NormedAlgebra K (RationalLocalization K A n g f) := sorry
+
+noncomputable instance rationalLocalizationCompleteSpace (n : ℕ) (g : A) (f : Fin n → A) :
+    CompleteSpace (RationalLocalization K A n g f) := sorry
+
+noncomputable instance rationalLocalizationIsUltrametricDist
+    (n : ℕ) (g : A) (f : Fin n → A) :
+    IsUltrametricDist (RationalLocalization K A n g f) := sorry
+
+noncomputable instance rationalLocalizationIsScalarTower
+    (n : ℕ) (g : A) (f : Fin n → A) :
+    IsScalarTower K A (RationalLocalization K A n g f) := sorry
+
+namespace RationalLocalization
+
+/-- The canonical continuous map from the original algebra to its rational localization. -/
+noncomputable def baseMap (n : ℕ) (g : A) (f : Fin n → A) :
+    ContinuousAlgHom K A (RationalLocalization K A n g f) := sorry
+
+@[simp]
+theorem baseMap_apply (n : ℕ) (g : A) (f : Fin n → A) (a : A) :
+    baseMap K A n g f a = algebraMap A (RationalLocalization K A n g f) a := sorry
+
+/-- The coordinate representing the quotient `fᵢ / g` in a rational localization. -/
+noncomputable def coordinate (n : ℕ) (g : A) (f : Fin n → A) (i : Fin n) :
+    RationalLocalization K A n g f := sorry
+
+/-- The defining relation `gTᵢ = fᵢ` of a rational localization. -/
+@[simp]
+theorem baseMap_denominator_mul_coordinate (n : ℕ) (g : A) (f : Fin n → A) (i : Fin n) :
+    baseMap K A n g f g * coordinate K A n g f i = baseMap K A n g f (f i) := sorry
+
+/-- Every coordinate of a rational localization is power-bounded. -/
+theorem isPowerBounded_coordinate (n : ℕ) (g : A) (f : Fin n → A) (i : Fin n) :
+    IsPowerBounded (coordinate K A n g f i) := sorry
+
+/-- The denominator becomes a unit when the numerator and denominator generate the unit ideal. -/
+theorem isUnit_baseMap_denominator (n : ℕ) (g : A) (f : Fin n → A)
+    (h : IsRationalDatum g f) : IsUnit (baseMap K A n g f g) := sorry
+
+/-- Map a rational localization to a complete nonarchimedean algebra by choosing power-bounded
+images of its coordinates that satisfy the defining relations. -/
+noncomputable def lift
+    {B : Type w} [NormedCommRing B] [NormedAlgebra K B] [CompleteSpace B]
+    [IsUltrametricDist B] (n : ℕ) (g : A) (f : Fin n → A)
+    (φ : ContinuousAlgHom K A B) (x : Fin n → B)
+    (hx : ∀ i, IsPowerBounded (x i)) (hrel : ∀ i, φ g * x i = φ (f i)) :
+    ContinuousAlgHom K (RationalLocalization K A n g f) B := sorry
+
+@[simp]
+theorem lift_comp_baseMap
+    {B : Type w} [NormedCommRing B] [NormedAlgebra K B] [CompleteSpace B]
+    [IsUltrametricDist B] (n : ℕ) (g : A) (f : Fin n → A)
+    (φ : ContinuousAlgHom K A B) (x : Fin n → B)
+    (hx : ∀ i, IsPowerBounded (x i)) (hrel : ∀ i, φ g * x i = φ (f i)) :
+    (lift K A n g f φ x hx hrel).comp (baseMap K A n g f) = φ := sorry
+
+@[simp]
+theorem lift_coordinate
+    {B : Type w} [NormedCommRing B] [NormedAlgebra K B] [CompleteSpace B]
+    [IsUltrametricDist B] (n : ℕ) (g : A) (f : Fin n → A)
+    (φ : ContinuousAlgHom K A B) (x : Fin n → B)
+    (hx : ∀ i, IsPowerBounded (x i)) (hrel : ∀ i, φ g * x i = φ (f i)) (i : Fin n) :
+    lift K A n g f φ x hx hrel (coordinate K A n g f i) = x i := sorry
+
+/-- Continuous homomorphisms from a rational localization agree if they agree on the original
+algebra and on every coordinate. -/
+@[ext]
+theorem hom_ext
+    {B : Type w} [NormedCommRing B] [NormedAlgebra K B]
+    (n : ℕ) (g : A) (f : Fin n → A)
+    (φ ψ : ContinuousAlgHom K (RationalLocalization K A n g f) B)
+    (hbase : φ.comp (baseMap K A n g f) = ψ.comp (baseMap K A n g f))
+    (hcoordinate : ∀ i, φ (coordinate K A n g f i) = ψ (coordinate K A n g f i)) :
+    φ = ψ := sorry
+
+/-- The lift from a rational localization is the unique continuous homomorphism with the prescribed
+values on the original algebra and the coordinates. -/
+theorem lift_unique
+    {B : Type w} [NormedCommRing B] [NormedAlgebra K B] [CompleteSpace B]
+    [IsUltrametricDist B] (n : ℕ) (g : A) (f : Fin n → A)
+    (φ : ContinuousAlgHom K A B) (x : Fin n → B)
+    (hx : ∀ i, IsPowerBounded (x i)) (hrel : ∀ i, φ g * x i = φ (f i))
+    (ψ : ContinuousAlgHom K (RationalLocalization K A n g f) B)
+    (hbase : ψ.comp (baseMap K A n g f) = φ)
+    (hcoordinate : ∀ i, ψ (coordinate K A n g f i) = x i) :
+    ψ = lift K A n g f φ x hx hrel := by
+  apply hom_ext K A n g f
+  · exact hbase.trans (lift_comp_baseMap K A n g f φ x hx hrel).symm
+  · intro i
+    exact (hcoordinate i).trans (lift_coordinate K A n g f φ x hx hrel i).symm
+
+/-- Universal mapping property of a rational localization. -/
+theorem existsUnique_lift
+    {B : Type w} [NormedCommRing B] [NormedAlgebra K B] [CompleteSpace B]
+    [IsUltrametricDist B] (n : ℕ) (g : A) (f : Fin n → A)
+    (φ : ContinuousAlgHom K A B) (x : Fin n → B)
+    (hx : ∀ i, IsPowerBounded (x i)) (hrel : ∀ i, φ g * x i = φ (f i)) :
+    ∃! ψ : ContinuousAlgHom K (RationalLocalization K A n g f) B,
+      ψ.comp (baseMap K A n g f) = φ ∧
+        ∀ i, ψ (coordinate K A n g f i) = x i := by
+  refine ⟨lift K A n g f φ x hx hrel, ?_, ?_⟩
+  · exact ⟨lift_comp_baseMap K A n g f φ x hx hrel,
+      lift_coordinate K A n g f φ x hx hrel⟩
+  · intro ψ hψ
+    exact lift_unique K A n g f φ x hx hrel ψ hψ.1 hψ.2
+
+end RationalLocalization
+
+/-- A rational localization of an affinoid algebra is affinoid. -/
+theorem isAffinoidAlgebra_rationalLocalization (hA : IsAffinoidAlgebra K A)
+    (n : ℕ) (g : A) (f : Fin n → A) :
+    IsAffinoidAlgebra K (RationalLocalization K A n g f) := sorry
 
 /-- A point of the Berkovich spectrum of `A`: a bounded multiplicative seminorm extending the norm
 on `K`. The bound is normalized to be contractive. -/
