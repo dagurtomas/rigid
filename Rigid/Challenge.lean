@@ -522,9 +522,73 @@ structure BerkovichSpectrum where
 instance berkovichSpectrumCoeFun : CoeFun (BerkovichSpectrum R) (fun _ ↦ R → ℝ) :=
   ⟨fun x ↦ x.seminorm⟩
 
-/-- The weakest topology for which evaluation at every element of the ring is continuous. -/
+namespace BerkovichSpectrum
+
+/-- Two points of the Berkovich spectrum are equal when all their values are equal. -/
+@[ext]
+theorem ext {x y : BerkovichSpectrum R} (h : ∀ a, x a = y a) : x = y := sorry
+
+@[simp]
+theorem map_zero (x : BerkovichSpectrum R) : x 0 = 0 := sorry
+
+@[simp]
+theorem map_one (x : BerkovichSpectrum R) : x 1 = 1 := sorry
+
+@[simp]
+theorem map_neg (x : BerkovichSpectrum R) (a : R) : x (-a) = x a := sorry
+
+@[simp]
+theorem map_mul (x : BerkovichSpectrum R) (a b : R) : x (a * b) = x a * x b := sorry
+
+/-- A point of the Berkovich spectrum is subadditive. -/
+theorem map_add_le (x : BerkovichSpectrum R) (a b : R) : x (a + b) ≤ x a + x b := sorry
+
+/-- A point of the Berkovich spectrum takes nonnegative values. -/
+theorem nonneg (x : BerkovichSpectrum R) (a : R) : 0 ≤ x a := sorry
+
+/-- A point of the Berkovich spectrum is bounded by the given ring norm. -/
+theorem le_norm (x : BerkovichSpectrum R) (a : R) : x a ≤ ‖a‖ := sorry
+
+/-- The kernel of a point of the Berkovich spectrum. -/
+def kernel (x : BerkovichSpectrum R) : Ideal R := sorry
+
+@[simp]
+theorem mem_kernel_iff (x : BerkovichSpectrum R) (a : R) : a ∈ x.kernel ↔ x a = 0 := sorry
+
+/-- The kernel of a multiplicative seminorm is a prime ideal. -/
+theorem kernel_isPrime (x : BerkovichSpectrum R) : x.kernel.IsPrime := sorry
+
+/-- Pull back a Berkovich point along a norm-nonincreasing ring homomorphism. -/
+def comap {S : Type w} [NormedRing S] (f : R →+* S) (hf : ∀ a, ‖f a‖ ≤ ‖a‖)
+    (x : BerkovichSpectrum S) : BerkovichSpectrum R := sorry
+
+@[simp]
+theorem comap_apply {S : Type w} [NormedRing S] (f : R →+* S) (hf : ∀ a, ‖f a‖ ≤ ‖a‖)
+    (x : BerkovichSpectrum S) (a : R) : comap R f hf x a = x (f a) := sorry
+
+end BerkovichSpectrum
+
+/-- The topology of pointwise convergence on the Berkovich spectrum. -/
 noncomputable instance berkovichSpectrumTopologicalSpace :
     TopologicalSpace (BerkovichSpectrum R) := sorry
+
+namespace BerkovichSpectrum
+
+/-- The map sending a point of the Berkovich spectrum to its underlying function is an embedding. -/
+theorem isEmbedding_coe :
+    Topology.IsEmbedding (fun x : BerkovichSpectrum R ↦ (x : R → ℝ)) := sorry
+
+/-- Evaluation at a ring element is continuous on the Berkovich spectrum. -/
+theorem continuous_eval (a : R) : Continuous fun x : BerkovichSpectrum R ↦ x a := sorry
+
+/-- A map into the Berkovich spectrum is continuous exactly when all its evaluations are
+continuous. -/
+theorem continuous_iff_eval {X : Type w} [TopologicalSpace X] {f : X → BerkovichSpectrum R} :
+    Continuous f ↔ ∀ a : R, Continuous fun x ↦ f x a := sorry
+
+/-- Pullback of Berkovich points along a norm-nonincreasing ring homomorphism is continuous. -/
+theorem continuous_comap {S : Type w} [NormedRing S] (f : R →+* S) (hf : ∀ a, ‖f a‖ ≤ ‖a‖) :
+    Continuous (comap R f hf) := sorry
 
 /-- Convergence in the Berkovich spectrum is pointwise convergence of seminorms. -/
 theorem tendsto_iff_eval {l : Filter (BerkovichSpectrum R)} {x : BerkovichSpectrum R} :
@@ -533,7 +597,28 @@ theorem tendsto_iff_eval {l : Filter (BerkovichSpectrum R)} {x : BerkovichSpectr
 /-- The Berkovich spectrum is Hausdorff. -/
 noncomputable instance berkovichSpectrumT2Space : T2Space (BerkovichSpectrum R) := sorry
 
+/-- The Berkovich spectrum of every normed ring is compact. -/
+theorem isCompact_univ : IsCompact (Set.univ : Set (BerkovichSpectrum R)) := sorry
+
+noncomputable instance berkovichSpectrumCompactSpace : CompactSpace (BerkovichSpectrum R) := sorry
+
 end BerkovichSpectrum
+
+end BerkovichSpectrum
+
+namespace BerkovichSpectrum
+
+/-- A bounded multiplicative seminorm on a nonarchimedean commutative normed ring is
+nonarchimedean. -/
+theorem map_add_le_max {R : Type v} [NormedCommRing R] [IsUltrametricDist R]
+    (x : BerkovichSpectrum R) (a b : R) : x (a + b) ≤ max (x a) (x b) := sorry
+
+end BerkovichSpectrum
+
+/-- The Berkovich spectrum of a nonzero complete commutative normed ring is nonempty. -/
+theorem nonempty_berkovichSpectrum_of_complete
+    (R : Type v) [NormedCommRing R] [CompleteSpace R] [Nontrivial R] :
+    Nonempty (BerkovichSpectrum R) := sorry
 
 /-- The Berkovich spectrum of a nonzero affinoid algebra is nonempty. -/
 theorem nonempty_berkovichSpectrum [Nontrivial A] (hA : IsAffinoidAlgebra K A) :

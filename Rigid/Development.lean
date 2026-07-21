@@ -1,5 +1,6 @@
 import Mathlib
 import Rigid.AffinoidAlgebra.Basic
+import Rigid.Berkovich.Spectrum
 import Rigid.AffinoidAlgebra.QuotientNorm
 import Rigid.AffinoidAlgebra.QuotientTopology
 import Rigid.AffinoidAlgebra.RationalDatum
@@ -569,26 +570,182 @@ structure BerkovichSpectrum where
 instance berkovichSpectrumCoeFun : CoeFun (BerkovichSpectrum R) (fun _ ↦ R → ℝ) :=
   ⟨fun x ↦ x.seminorm⟩
 
-/-- The weakest topology for which evaluation at every element of the ring is continuous. -/
-noncomputable instance berkovichSpectrumTopologicalSpace :
-    TopologicalSpace (BerkovichSpectrum R) := sorry
+namespace BerkovichSpectrum
 
-/-- Convergence in the Berkovich spectrum is pointwise convergence of seminorms. -/
-theorem tendsto_iff_eval {l : Filter (BerkovichSpectrum R)} {x : BerkovichSpectrum R} :
-    Tendsto id l (𝓝 x) ↔ ∀ a : R, Tendsto (fun y ↦ y a) l (𝓝 (x a)) := sorry
+/-- Two points of the Berkovich spectrum are equal when all their values are equal. -/
+@[ext]
+theorem ext {x y : BerkovichSpectrum R} (h : ∀ a, x a = y a) : x = y := by
+  cases x with
+  | mk px hx =>
+    cases y with
+    | mk py hy =>
+      congr
+      exact MulRingSeminorm.ext h
 
-/-- The Berkovich spectrum is Hausdorff. -/
-noncomputable instance berkovichSpectrumT2Space : T2Space (BerkovichSpectrum R) := sorry
+@[simp]
+theorem map_zero (x : BerkovichSpectrum R) : x 0 = 0 :=
+  _root_.map_zero x.seminorm
+
+@[simp]
+theorem map_one (x : BerkovichSpectrum R) : x 1 = 1 :=
+  _root_.map_one x.seminorm
+
+@[simp]
+theorem map_neg (x : BerkovichSpectrum R) (a : R) : x (-a) = x a :=
+  map_neg_eq_map x.seminorm a
+
+@[simp]
+theorem map_mul (x : BerkovichSpectrum R) (a b : R) : x (a * b) = x a * x b :=
+  _root_.map_mul x.seminorm a b
+
+/-- A point of the Berkovich spectrum is subadditive. -/
+theorem map_add_le (x : BerkovichSpectrum R) (a b : R) : x (a + b) ≤ x a + x b :=
+  map_add_le_add x.seminorm a b
+
+/-- A point of the Berkovich spectrum takes nonnegative values. -/
+theorem nonneg (x : BerkovichSpectrum R) (a : R) : 0 ≤ x a :=
+  apply_nonneg x.seminorm a
+
+/-- A point of the Berkovich spectrum is bounded by the given ring norm. -/
+theorem le_norm (x : BerkovichSpectrum R) (a : R) : x a ≤ ‖a‖ :=
+  x.le_norm' a
+
+/-- The kernel of a point of the Berkovich spectrum. -/
+def kernel (x : BerkovichSpectrum R) : Ideal R where
+  carrier := {a | x a = 0}
+  zero_mem' := x.map_zero
+  add_mem' {a b} ha hb := by
+    apply le_antisymm
+    · exact (map_add_le R x a b).trans_eq (by rw [ha, hb, add_zero])
+    · exact nonneg R x (a + b)
+  smul_mem' r a ha := by
+    change x (r * a) = 0
+    rw [x.map_mul, ha, mul_zero]
+
+@[simp]
+theorem mem_kernel_iff (x : BerkovichSpectrum R) (a : R) : a ∈ x.kernel ↔ x a = 0 :=
+  Iff.rfl
+
+/-- The kernel of a multiplicative seminorm is a prime ideal. -/
+theorem kernel_isPrime (x : BerkovichSpectrum R) : x.kernel.IsPrime := by
+  refine Ideal.IsPrime.mk ?_ ?_
+  · rw [Ideal.ne_top_iff_one]
+    simp
+  · intro a b hab
+    rw [mem_kernel_iff R x, map_mul R x] at hab
+    rcases mul_eq_zero.mp hab with ha | hb
+    · exact Or.inl ((mem_kernel_iff R x a).mpr ha)
+    · exact Or.inr ((mem_kernel_iff R x b).mpr hb)
+
+/-- Pull back a Berkovich point along a norm-nonincreasing ring homomorphism. -/
+def comap {S : Type w} [NormedRing S] (f : R →+* S) (hf : ∀ a, ‖f a‖ ≤ ‖a‖)
+    (x : BerkovichSpectrum S) : BerkovichSpectrum R where
+  seminorm :=
+    { toFun := fun a ↦ x (f a)
+      map_zero' := by simp
+      add_le' := by intro a b; simpa using map_add_le S x (f a) (f b)
+      neg' := by intro a; simp
+      map_one' := by simp
+      map_mul' := by intro a b; simp }
+  le_norm' a := (le_norm S x (f a)).trans (hf a)
+
+@[simp]
+theorem comap_apply {S : Type w} [NormedRing S] (f : R →+* S) (hf : ∀ a, ‖f a‖ ≤ ‖a‖)
+    (x : BerkovichSpectrum S) (a : R) : comap R f hf x a = x (f a) :=
+  rfl
 
 end BerkovichSpectrum
 
+/-- The topology of pointwise convergence on the Berkovich spectrum. -/
+noncomputable instance berkovichSpectrumTopologicalSpace :
+    TopologicalSpace (BerkovichSpectrum R) :=
+  TopologicalSpace.induced (fun x : BerkovichSpectrum R ↦ (x : R → ℝ)) inferInstance
+
+namespace BerkovichSpectrum
+
+/-- The map sending a point of the Berkovich spectrum to its underlying function is an embedding. -/
+theorem isEmbedding_coe :
+    Topology.IsEmbedding (fun x : BerkovichSpectrum R ↦ (x : R → ℝ)) := by
+  refine ⟨Topology.IsInducing.induced _, ?_⟩
+  intro x y h
+  ext a
+  exact congr_fun h a
+
+/-- Evaluation at a ring element is continuous on the Berkovich spectrum. -/
+theorem continuous_eval (a : R) : Continuous fun x : BerkovichSpectrum R ↦ x a :=
+  (continuous_apply a).comp (isEmbedding_coe R).continuous
+
+/-- A map into the Berkovich spectrum is continuous exactly when all its evaluations are
+continuous. -/
+theorem continuous_iff_eval {X : Type w} [TopologicalSpace X] {f : X → BerkovichSpectrum R} :
+    Continuous f ↔ ∀ a : R, Continuous fun x ↦ f x a := by
+  rw [continuous_induced_rng]
+  exact continuous_pi_iff
+
+/-- Pullback of Berkovich points along a norm-nonincreasing ring homomorphism is continuous. -/
+theorem continuous_comap {S : Type w} [NormedRing S] (f : R →+* S) (hf : ∀ a, ‖f a‖ ≤ ‖a‖) :
+    Continuous (comap R f hf) :=
+  (continuous_iff_eval R).2 fun a ↦ continuous_eval S (f a)
+
+/-- Convergence in the Berkovich spectrum is pointwise convergence of seminorms. -/
+theorem tendsto_iff_eval {l : Filter (BerkovichSpectrum R)} {x : BerkovichSpectrum R} :
+    Tendsto id l (𝓝 x) ↔ ∀ a : R, Tendsto (fun y ↦ y a) l (𝓝 (x a)) := by
+  rw [(isEmbedding_coe R).isInducing.tendsto_nhds_iff, tendsto_pi_nhds]
+  rfl
+
+/-- The Berkovich spectrum is Hausdorff. -/
+noncomputable instance berkovichSpectrumT2Space : T2Space (BerkovichSpectrum R) :=
+  (isEmbedding_coe R).t2Space
+
+private noncomputable def homeomorphRigid :
+    Rigid.BerkovichSpectrum R ≃ₜ BerkovichSpectrum R where
+  toFun x := ⟨x.seminorm, x.le_norm'⟩
+  invFun x := ⟨x.seminorm, x.le_norm'⟩
+  left_inv x := by cases x; rfl
+  right_inv x := by cases x; rfl
+  continuous_toFun := (continuous_iff_eval R).2 fun a ↦
+    Rigid.BerkovichSpectrum.continuous_eval R a
+  continuous_invFun := (Rigid.BerkovichSpectrum.continuous_iff_eval R).2 fun a ↦
+    continuous_eval R a
+
+/-- The Berkovich spectrum of every normed ring is compact. -/
+theorem isCompact_univ : IsCompact (Set.univ : Set (BerkovichSpectrum R)) := by
+  have h := ((homeomorphRigid R).isCompact_image (s := Set.univ)).2
+    (Rigid.BerkovichSpectrum.isCompact_univ R)
+  simpa using h
+
+noncomputable instance berkovichSpectrumCompactSpace : CompactSpace (BerkovichSpectrum R) :=
+  isCompact_univ_iff.mp (isCompact_univ R)
+
+end BerkovichSpectrum
+
+end BerkovichSpectrum
+
+namespace BerkovichSpectrum
+
+/-- A bounded multiplicative seminorm on a nonarchimedean commutative normed ring is
+nonarchimedean. -/
+theorem map_add_le_max {R : Type v} [NormedCommRing R] [IsUltrametricDist R]
+    (x : BerkovichSpectrum R) (a b : R) : x (a + b) ≤ max (x a) (x b) := sorry
+
+end BerkovichSpectrum
+
+/-- The Berkovich spectrum of a nonzero complete commutative normed ring is nonempty. -/
+theorem nonempty_berkovichSpectrum_of_complete
+    (R : Type v) [NormedCommRing R] [CompleteSpace R] [Nontrivial R] :
+    Nonempty (BerkovichSpectrum R) := sorry
+
 /-- The Berkovich spectrum of a nonzero affinoid algebra is nonempty. -/
 theorem nonempty_berkovichSpectrum [Nontrivial A] (hA : IsAffinoidAlgebra K A) :
-    Nonempty (BerkovichSpectrum A) := sorry
+    Nonempty (BerkovichSpectrum A) := by
+  rcases hA with ⟨_⟩
+  exact nonempty_berkovichSpectrum_of_complete A
 
 /-- The Berkovich spectrum of an affinoid algebra is compact. -/
 theorem isCompact_univ_berkovichSpectrum (hA : IsAffinoidAlgebra K A) :
-    IsCompact (Set.univ : Set (BerkovichSpectrum A)) := sorry
+    IsCompact (Set.univ : Set (BerkovichSpectrum A)) := by
+  rcases hA with ⟨_⟩
+  exact BerkovichSpectrum.isCompact_univ A
 
 end AffinoidAlgebra
 

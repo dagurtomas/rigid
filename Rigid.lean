@@ -2,6 +2,7 @@ import Rigid.AffinoidAlgebra.Basic
 import Rigid.AffinoidAlgebra.QuotientNorm
 import Rigid.AffinoidAlgebra.QuotientTopology
 import Rigid.AffinoidAlgebra.RationalDatum
+import Rigid.Berkovich.Spectrum
 import Rigid.Development
 import Rigid.TateAlgebra.Basic
 import Rigid.TateAlgebra.Complete
