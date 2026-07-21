@@ -25,14 +25,24 @@ Huber pairs.
 
 Reuse `MvPowerSeries.IsRestricted` from mathlib for the underlying restricted power series.
 
-1. Define coordinates and the Gauss norm.
-2. Construct the normed commutative `K`-algebra structure.
-3. Prove the ultrametric inequality, multiplicativity of the Gauss norm, and completeness.
-4. Prove density of polynomials and the universal property for power-bounded tuples.
-5. Generalize to positive polyradii only after the strict unit-radius API is stable.
+1. Define coordinates and the Gauss norm. **Done** (`TateAlgebra/Basic`, `TateAlgebra/GaussNorm`).
+2. Construct the normed commutative `K`-algebra structure. **Done** (`TateAlgebra/NormedRing`).
+3. Prove the ultrametric inequality (**done**), multiplicativity of the Gauss norm, and
+   completeness.
+4. Prove density of polynomials and the universal property for tuples of norm at most one.
+   **Done** (`TateAlgebra/NormedRing`, `TateAlgebra/UniversalProperty`); neither completeness of `K`
+   nor finiteness of the variable set was needed.
+5. Extend the universal property from tuples of norm at most one to power-bounded tuples.
+6. Generalize to positive polyradii only after the strict unit-radius API is stable.
 
 The multiplicativity proof is the first substantial algebraic milestone. It will likely need a
 carefully chosen maximal coefficient argument rather than only generic norm estimates.
+
+The universal property required a correction to the challenge statement: the codomain must be a
+`NormedCommRing` rather than a `SeminormedCommRing`. Uniqueness genuinely needs the codomain to be
+Hausdorff — when the seminorm has a nontrivial null ideal, one can perturb a continuous algebra
+homomorphism by a suitable derivation vanishing on polynomials (which are dense) without changing
+its values on the coordinates.
 
 ### 2. Affinoid algebra
 
