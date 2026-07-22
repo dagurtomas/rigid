@@ -7,6 +7,7 @@ import Rigid.Berkovich.RelativeSpectrum
 import Rigid.Berkovich.RelativeNonempty
 import Rigid.Berkovich.CompletedResidue
 import Rigid.Berkovich.AffinoidDomain
+import Rigid.AffinoidSpectrum.RationalBasis
 import Rigid.AffinoidAlgebra.QuotientNorm
 import Rigid.AffinoidAlgebra.QuotientTopology
 import Rigid.AffinoidAlgebra.RationalDatum
@@ -1253,6 +1254,23 @@ structure AffinoidRationalSubdomain
 
 namespace AffinoidRationalSubdomain
 
+private def toRigid (U : AffinoidRationalSubdomain K A) :
+    Rigid.AffinoidRationalSubdomain K A where
+  n := U.n
+  g := U.g
+  f := U.f
+  isRational := U.isRational
+
+private def pointToRigid (x : BerkovichSpectrumOver K A) :
+    Rigid.BerkovichSpectrumOver K A where
+  toBerkovichSpectrum :=
+    { seminorm := x.toBerkovichSpectrum.seminorm
+      le_norm' := x.toBerkovichSpectrum.le_norm' }
+  map_algebraMap' := x.map_algebraMap'
+
+private def extendedNumerator (U : AffinoidRationalSubdomain K A) : Fin (U.n + 1) → A :=
+  Fin.cases U.g U.f
+
 /-- The point set of a bundled rational subdomain. -/
 def carrier (U : AffinoidRationalSubdomain K A) : Set (BerkovichSpectrumOver K A) :=
   BerkovichSpectrumOver.rationalDomainSet K A U.g U.f
@@ -1263,19 +1281,37 @@ abbrev Sections (U : AffinoidRationalSubdomain K A) :=
 
 /-- The intersection of two rational subdomains, represented again by a rational datum. -/
 noncomputable def inter (U V : AffinoidRationalSubdomain K A) :
-    AffinoidRationalSubdomain K A := sorry
+    AffinoidRationalSubdomain K A where
+  n := (U.n + 1) * (V.n + 1)
+  g := U.g * V.g
+  f k :=
+    extendedNumerator K A U (finProdFinEquiv.symm k).1 *
+      extendedNumerator K A V (finProdFinEquiv.symm k).2
+  isRational := by
+    exact (Rigid.AffinoidRationalSubdomain.inter K A
+      (toRigid K A U) (toRigid K A V)).isRational
 
 @[simp]
 theorem carrier_inter (U V : AffinoidRationalSubdomain K A) :
-    (inter K A U V).carrier = U.carrier ∩ V.carrier := sorry
+    (inter K A U V).carrier = U.carrier ∩ V.carrier := by
+  ext x
+  have h := Set.ext_iff.mp
+    (Rigid.AffinoidRationalSubdomain.carrier_inter K A
+      (toRigid K A U) (toRigid K A V))
+    (pointToRigid K A x)
+  exact h
 
 /-- The intersection is contained in its left factor. -/
 theorem inter_subset_left (U V : AffinoidRationalSubdomain K A) :
-    (inter K A U V).carrier ⊆ U.carrier := sorry
+    (inter K A U V).carrier ⊆ U.carrier := by
+  rw [carrier_inter]
+  exact Set.inter_subset_left
 
 /-- The intersection is contained in its right factor. -/
 theorem inter_subset_right (U V : AffinoidRationalSubdomain K A) :
-    (inter K A U V).carrier ⊆ V.carrier := sorry
+    (inter K A U V).carrier ⊆ V.carrier := by
+  rw [carrier_inter]
+  exact Set.inter_subset_right
 
 /-- Restriction of analytic functions along an inclusion of rational subdomains. -/
 noncomputable def restriction {U V : AffinoidRationalSubdomain K A}
