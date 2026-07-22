@@ -363,7 +363,6 @@ noncomputable def residueNormedCommRing (P : AffinoidPresentation K A) :
   Rigid.residueNormedCommRing K A P.n P.ideal P.equiv
 
 /-- The residue norm makes the target a normed algebra over the ground field. -/
-@[reducible]
 noncomputable instance residueNormedAlgebra (P : AffinoidPresentation K A) :
     letI := P.residueNormedCommRing
     NormedAlgebra K A :=

@@ -35,8 +35,7 @@ noncomputable def residueNormedCommRing (n : ℕ)
     e.symm.toRingHom e.symm.injective
 
 /-- The residue norm makes the target a normed algebra over the ground field. -/
-@[reducible]
-noncomputable def residueNormedAlgebra (n : ℕ)
+noncomputable instance residueNormedAlgebra (n : ℕ)
     (I : Ideal (TateAlgebra K (Fin n)))
     (e : (TateAlgebra K (Fin n) ⧸ I) ≃ₐ[K] A) :
     letI := residueNormedCommRing K A n I e
@@ -52,9 +51,9 @@ noncomputable def residueNormedAlgebra (n : ℕ)
       rw [map_smul]
       exact norm_smul_le _ _ }
 
+omit [CompleteSpace K] in
 /-- The scalar embedding of the residue normed algebra agrees with the presentation map applied to
 constant Tate series. -/
-omit [CompleteSpace K] in
 @[simp]
 theorem residueNormedAlgebra_algebraMap (n : ℕ)
     (I : Ideal (TateAlgebra K (Fin n)))
