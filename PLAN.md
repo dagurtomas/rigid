@@ -8,8 +8,9 @@ The first pass will treat a complete nontrivially normed field `K` with
 - Tate algebras initially have finitely many variables and unit polyradius.
 - A strict affinoid algebra is a `K`-algebra isomorphic to a quotient of a Tate algebra; no norm or
   topology is part of the affinoidness predicate.
-- The Berkovich spectrum of a normed ring consists of contractive multiplicative real-valued
-  seminorms; it does not depend on a choice of ground field.
+- The unrestricted Berkovich spectrum of a normed ring consists of contractive multiplicative
+  real-valued seminorms. For geometry over `K`, `BerkovichSpectrumOver K A` imposes that the
+  seminorm restricts to the given norm on `K`.
 - Global spaces and morphisms will be built only after the affinoid theory and its sheaf theorem are
   available.
 - `Rigid/Challenge.lean` is a standalone specification file. It has only mathlib imports and keeps
@@ -115,9 +116,12 @@ geometric objects.
    Completeness is unnecessary.
 3. Develop pointwise evaluation, prime kernels, and contravariance. The basic evaluation, kernel,
    norm-nonincreasing pullback, and nonarchimedeanity APIs are **done**.
-4. Define completed residue fields and evaluation maps.
-5. Define affinoid domains and analytic functions.
-6. Build Berkovich spaces from affinoid atlases, then define good, strict, Hausdorff, and
+4. Define the relative spectrum over the ground field. **Done** (`Berkovich/RelativeSpectrum`): it
+   is the closed compact Hausdorff subspace where seminorms restrict to the norm on `K`, with
+   continuous contravariant pullback.
+5. Define completed residue fields and evaluation maps.
+6. Define affinoid domains and analytic functions.
+7. Build Berkovich spaces from affinoid atlases, then define good, strict, Hausdorff, and
    paracompact objects and analytic morphisms.
 
 ### 6. Comparison

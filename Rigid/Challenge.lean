@@ -619,6 +619,82 @@ theorem map_add_le_max {R : Type v} [NormedCommRing R] [IsUltrametricDist R]
 
 end BerkovichSpectrum
 
+/-- The Berkovich spectrum of a normed `K`-algebra relative to `K`: its points restrict to the given
+norm on the ground field. -/
+structure BerkovichSpectrumOver
+    (K : Type u) [NontriviallyNormedField K] [CompleteSpace K] [IsUltrametricDist K]
+    (A : Type v) [NormedCommRing A] [Algebra K A] where
+  toBerkovichSpectrum : BerkovichSpectrum A
+  map_algebraMap' : ∀ r : K, toBerkovichSpectrum (algebraMap K A r) = ‖r‖
+
+instance berkovichSpectrumOverCoeFun : CoeFun (BerkovichSpectrumOver K A) (fun _ ↦ A → ℝ) :=
+  ⟨fun x ↦ x.toBerkovichSpectrum⟩
+
+namespace BerkovichSpectrumOver
+
+@[ext]
+theorem ext {x y : BerkovichSpectrumOver K A} (h : ∀ a, x a = y a) : x = y := sorry
+
+@[simp]
+theorem map_algebraMap (x : BerkovichSpectrumOver K A) (r : K) :
+    x (algebraMap K A r) = ‖r‖ := sorry
+
+/-- The prime kernel of a relative Berkovich point. -/
+def kernel (x : BerkovichSpectrumOver K A) : Ideal A := sorry
+
+@[simp]
+theorem mem_kernel_iff (x : BerkovichSpectrumOver K A) (a : A) :
+    a ∈ x.kernel ↔ x a = 0 := sorry
+
+theorem kernel_isPrime (x : BerkovichSpectrumOver K A) : x.kernel.IsPrime := sorry
+
+/-- Pull back a relative point along a norm-nonincreasing algebra homomorphism. -/
+def comap {B : Type w} [NormedCommRing B] [NormedAlgebra K B] [CompleteSpace B]
+    [IsUltrametricDist B] (f : A →ₐ[K] B) (hf : ∀ a, ‖f a‖ ≤ ‖a‖)
+    (x : BerkovichSpectrumOver K B) :
+    BerkovichSpectrumOver K A := sorry
+
+@[simp]
+theorem comap_apply {B : Type w} [NormedCommRing B] [NormedAlgebra K B] [CompleteSpace B]
+    [IsUltrametricDist B] (f : A →ₐ[K] B) (hf : ∀ a, ‖f a‖ ≤ ‖a‖)
+    (x : BerkovichSpectrumOver K B) (a : A) :
+    comap K A f hf x a = x (f a) := sorry
+
+end BerkovichSpectrumOver
+
+noncomputable instance berkovichSpectrumOverTopologicalSpace :
+    TopologicalSpace (BerkovichSpectrumOver K A) := sorry
+
+namespace BerkovichSpectrumOver
+
+/-- Evaluation at an algebra element is continuous on the relative spectrum. -/
+theorem continuous_eval (a : A) : Continuous fun x : BerkovichSpectrumOver K A ↦ x a := sorry
+
+/-- A map into the relative spectrum is continuous exactly when all evaluations are continuous. -/
+theorem continuous_iff_eval {X : Type w} [TopologicalSpace X]
+    {f : X → BerkovichSpectrumOver K A} :
+    Continuous f ↔ ∀ a : A, Continuous fun x ↦ f x a := sorry
+
+/-- Pullback of relative Berkovich points is continuous. -/
+theorem continuous_comap {B : Type w} [NormedCommRing B] [NormedAlgebra K B]
+    [CompleteSpace B] [IsUltrametricDist B] (f : A →ₐ[K] B) (hf : ∀ a, ‖f a‖ ≤ ‖a‖) :
+    Continuous (comap K A f hf) := sorry
+
+noncomputable instance berkovichSpectrumOverT2Space [CompleteSpace A] [IsUltrametricDist A] :
+    T2Space (BerkovichSpectrumOver K A) := sorry
+
+/-- The relative Berkovich spectrum is compact. -/
+theorem isCompact_univ : IsCompact (Set.univ : Set (BerkovichSpectrumOver K A)) := sorry
+
+noncomputable instance berkovichSpectrumOverCompactSpace [CompleteSpace A]
+    [IsUltrametricDist A] : CompactSpace (BerkovichSpectrumOver K A) := sorry
+
+/-- Relative Berkovich points over a nonarchimedean ring are nonarchimedean. -/
+theorem map_add_le_max (x : BerkovichSpectrumOver K A) (a b : A) :
+    x (a + b) ≤ max (x a) (x b) := sorry
+
+end BerkovichSpectrumOver
+
 /-- The Berkovich spectrum of a nonzero nonarchimedean commutative normed ring is nonempty. -/
 theorem nonempty_berkovichSpectrum_of_isUltrametric
     (R : Type v) [NormedCommRing R] [IsUltrametricDist R] [Nontrivial R] :
@@ -636,6 +712,14 @@ theorem nonempty_berkovichSpectrum [Nontrivial A] (hA : IsAffinoidAlgebra K A) :
 /-- The Berkovich spectrum of an affinoid algebra is compact. -/
 theorem isCompact_univ_berkovichSpectrum (hA : IsAffinoidAlgebra K A) :
     IsCompact (Set.univ : Set (BerkovichSpectrum A)) := sorry
+
+/-- The relative Berkovich spectrum of a nonzero affinoid algebra is nonempty. -/
+theorem nonempty_berkovichSpectrumOver [Nontrivial A] (hA : IsAffinoidAlgebra K A) :
+    Nonempty (BerkovichSpectrumOver K A) := sorry
+
+/-- The relative Berkovich spectrum of an affinoid algebra is compact. -/
+theorem isCompact_univ_berkovichSpectrumOver (hA : IsAffinoidAlgebra K A) :
+    IsCompact (Set.univ : Set (BerkovichSpectrumOver K A)) := sorry
 
 end AffinoidAlgebra
 
@@ -1031,16 +1115,19 @@ noncomputable def pointsOfAffinoidHomeomorph {A : Type v} [CommRing A] [Algebra 
     (hA : IsAffinoidAlgebra K A) :
     Point K (ofAffinoid K hA) ≃ₜ
       (letI : NormedCommRing A := hA.presentation.residueNormedCommRing K A
-       BerkovichSpectrum A) := sorry
+       letI : NormedAlgebra K A := hA.presentation.residueNormedAlgebra K A
+       BerkovichSpectrumOver K A) := sorry
 
 /-- Pullback of Berkovich spectra along a morphism of affinoid algebras. -/
 noncomputable def spectrumComap {A : Type v} {B : Type w}
     [CommRing A] [Algebra K A] [CommRing B] [Algebra K B]
     (hA : IsAffinoidAlgebra K A) (hB : IsAffinoidAlgebra K B) (f : A →ₐ[K] B) :
     (letI : NormedCommRing B := hB.presentation.residueNormedCommRing K B
-     BerkovichSpectrum B) →
+     letI : NormedAlgebra K B := hB.presentation.residueNormedAlgebra K B
+     BerkovichSpectrumOver K B) →
       (letI : NormedCommRing A := hA.presentation.residueNormedCommRing K A
-       BerkovichSpectrum A) := sorry
+       letI : NormedAlgebra K A := hA.presentation.residueNormedAlgebra K A
+       BerkovichSpectrumOver K A) := sorry
 
 @[simp]
 theorem spectrumComap_id {A : Type v} [CommRing A] [Algebra K A]
