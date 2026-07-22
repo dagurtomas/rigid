@@ -395,12 +395,18 @@ theorem residueIsUltrametricDist (P : AffinoidPresentation K A) :
 /-- The metric topology of the residue norm is the quotient topology. -/
 theorem residueNormedCommRing_topology_eq (P : AffinoidPresentation K A) :
     (letI := P.residueNormedCommRing
-     inferInstance : TopologicalSpace A) = P.residueTopology := sorry
+     inferInstance : TopologicalSpace A) = P.residueTopology := by
+  let Q : Rigid.AffinoidPresentation K A :=
+    { n := P.n, ideal := P.ideal, equiv := P.equiv }
+  exact Rigid.AffinoidPresentation.residueNormedCommRing_topology_eq K A Q
 
 /-- The presentation map gives the target its exact quotient norm when the residue norm is used. -/
 theorem isQuotientNorm_toAlgHom (P : AffinoidPresentation K A) :
     letI := P.residueNormedCommRing
-    IsQuotientNorm (P.toAlgHom : TateAlgebra K (Fin P.n) → A) := sorry
+    IsQuotientNorm (P.toAlgHom : TateAlgebra K (Fin P.n) → A) := by
+  let Q : Rigid.AffinoidPresentation K A :=
+    { n := P.n, ideal := P.ideal, equiv := P.equiv }
+  exact Rigid.AffinoidPresentation.isQuotientNorm_toAlgHom K A Q
 
 end AffinoidPresentation
 

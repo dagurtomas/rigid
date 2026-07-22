@@ -1,4 +1,5 @@
 import Rigid.AffinoidAlgebra.AutomaticContinuity
+import Rigid.AffinoidAlgebra.QuotientNorm
 
 set_option linter.style.header false
 
@@ -111,5 +112,63 @@ theorem residueIsUltrametricDist (n : ℕ)
     change ‖e.symm (x + y)‖ ≤ max ‖e.symm x‖ ‖e.symm y‖
     rw [map_add]
     exact IsUltrametricDist.norm_add_le_max _ _
+
+namespace AffinoidPresentation
+
+/-- The metric topology transported from the quotient agrees with the topology coinduced by the
+presentation map. -/
+theorem residueNormedCommRing_topology_eq (P : AffinoidPresentation K A) :
+    (letI := residueNormedCommRing K A P.n P.ideal P.equiv
+     inferInstance : TopologicalSpace A) = P.residueTopology := by
+  letI : IsClosed (P.ideal : Set (TateAlgebra K (Fin P.n))) :=
+    Rigid.isClosed_tateAlgebra_ideal K P.ideal
+  letI : NormedCommRing (TateAlgebra K (Fin P.n) ⧸ P.ideal) := inferInstance
+  change TopologicalSpace.induced P.equiv.symm inferInstance =
+    TopologicalSpace.coinduced P.toAlgHom inferInstance
+  calc
+    TopologicalSpace.induced P.equiv.symm
+        (inferInstance : TopologicalSpace (TateAlgebra K (Fin P.n) ⧸ P.ideal)) =
+      TopologicalSpace.coinduced P.equiv
+        (inferInstance : TopologicalSpace (TateAlgebra K (Fin P.n) ⧸ P.ideal)) :=
+      congrFun P.equiv.toEquiv.induced_symm _
+    _ = TopologicalSpace.coinduced P.toAlgHom inferInstance := by
+      change (TopologicalSpace.coinduced (Ideal.Quotient.mk P.ideal) inferInstance).coinduced
+        P.equiv = TopologicalSpace.coinduced P.toAlgHom inferInstance
+      rw [coinduced_compose]
+      rfl
+
+/-- The presentation map gives the target its exact quotient norm when the transported residue norm
+is used. -/
+theorem isQuotientNorm_toAlgHom (P : AffinoidPresentation K A) :
+    letI := residueNormedCommRing K A P.n P.ideal P.equiv
+    IsQuotientNorm (P.toAlgHom : TateAlgebra K (Fin P.n) → A) := by
+  letI : IsClosed (P.ideal : Set (TateAlgebra K (Fin P.n))) :=
+    Rigid.isClosed_tateAlgebra_ideal K P.ideal
+  letI : NormedCommRing (TateAlgebra K (Fin P.n) ⧸ P.ideal) := inferInstance
+  letI : NormedCommRing A := residueNormedCommRing K A P.n P.ideal P.equiv
+  refine ⟨AffinoidPresentation.toAlgHom_surjective K A P, fun y ↦ ?_⟩
+  rw [quotientNorm]
+  apply le_antisymm
+  · obtain ⟨x, hx⟩ := AffinoidPresentation.toAlgHom_surjective K A P y
+    apply le_csInf
+    · exact ⟨‖x‖, x, hx, rfl⟩
+    · rintro _ ⟨z, hz, rfl⟩
+      change ‖P.equiv.symm y‖ ≤ ‖z‖
+      rw [← hz]
+      simpa [AffinoidPresentation.toAlgHom] using Ideal.Quotient.norm_mk_le P.ideal z
+  · refine le_of_forall_pos_le_add fun ε hε ↦ ?_
+    obtain ⟨x, hx, hxnorm⟩ := Ideal.Quotient.norm_mk_lt (P.equiv.symm y) hε
+    have hbdd : BddBelow ((fun z : TateAlgebra K (Fin P.n) ↦ ‖z‖) ''
+        {z | AffinoidPresentation.toAlgHom K A P z = y}) := by
+      refine ⟨0, ?_⟩
+      rintro _ ⟨z, -, rfl⟩
+      exact norm_nonneg z
+    refine (csInf_le hbdd ?_).trans (le_of_lt hxnorm)
+    refine ⟨x, ?_, rfl⟩
+    change P.equiv (Ideal.Quotient.mk P.ideal x) = y
+    rw [hx]
+    exact P.equiv.apply_symm_apply y
+
+end AffinoidPresentation
 
 end Rigid
