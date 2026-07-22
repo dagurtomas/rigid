@@ -24,15 +24,9 @@ noncomputable def residueNormedCommRing (n : ℕ)
     (I : Ideal (TateAlgebra K (Fin n)))
     (e : (TateAlgebra K (Fin n) ⧸ I) ≃ₐ[K] A) :
     NormedCommRing A :=
-  letI : IsClosed (I : Set (TateAlgebra K (Fin n))) :=
-    Rigid.isClosed_tateAlgebra_ideal K I
+  letI : IsClosed (I : Set (TateAlgebra K (Fin n))) := Rigid.isClosed_tateAlgebra_ideal K I
   { (inferInstance : CommRing A), NormedCommRing.induced A (TateAlgebra K (Fin n) ⧸ I)
-    e.symm.toRingHom e.symm.injective with }
-
-  }
-  letI : NormedCommRing (TateAlgebra K (Fin n) ⧸ I) := inferInstance
-  NormedCommRing.induced A (TateAlgebra K (Fin n) ⧸ I)
-    e.symm.toRingHom e.symm.injective
+      e.symm.toRingHom e.symm.injective with }
 
 /-- The residue norm makes the target a normed algebra over the ground field. -/
 @[reducible]
