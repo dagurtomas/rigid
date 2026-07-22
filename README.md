@@ -7,7 +7,9 @@ The standalone mathlib-only specification is [`Rigid/Challenge.lean`](Rigid/Chal
 implementation-facing comparator copy is [`Rigid/Development.lean`](Rigid/Development.lean). Both
 contain the same declarations in namespace `RigidChallenge`; Development imports project modules and
 replaces sorried bodies as implementations become available. See [`PLAN.md`](PLAN.md) for the
-dependency order, scope decisions, and open questions around the precise comparison theorem.
+dependency order and scope decisions. The global comparison target follows Berkovich's fully
+faithful and paracompact-equivalence theorem in §1.6 of *Étale cohomology for non-Archimedean
+analytic spaces*.
 
 ## GitHub configuration
 

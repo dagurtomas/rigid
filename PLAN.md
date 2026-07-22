@@ -124,35 +124,36 @@ geometric objects.
 
 1. Construct the comparison on affinoid objects and prove compatibility with rational domains.
 2. Show that it respects admissible gluing and analytic morphisms.
-3. Prove full faithfulness.
-4. Characterize the essential image.
-5. Package the result as `rigidToBerkovich_isEquivalence` and
-   `rigidBerkovichEquivalence`.
-6. Prove that separated rigid spaces correspond to Hausdorff Berkovich spaces.
+3. Construct the canonical Berkovich-to-rigid functor and prove full faithfulness.
+4. Characterize its paracompact essential image.
+5. Construct a rigid-to-Berkovich quasi-inverse on that image and package
+   `rigidToBerkovich_isEquivalence` and `rigidBerkovichEquivalence`.
 
-## The comparison statement still needs a fixed reference
+## Fixed comparison statement
 
-The predicates in `Rigid/Challenge.lean` currently encode the provisional comparison
+The comparison interface follows V. G. Berkovich, *Étale cohomology for non-Archimedean analytic
+spaces*, Publications Mathématiques de l'IHÉS **78** (1993), 5–161, Theorem 1.6.1, pp. 35–37
+([Numdam](http://www.numdam.org/item?id=PMIHES_1993__78__5_0)). For a nontrivially valued complete
+non-Archimedean field, the theorem states:
 
-- rigid side: locally affinoid, quasi-separated, and paracompact (typically via an affinoid cover of
-  finite type);
-- Berkovich side: good, strict, and paracompact.
+- the canonical functor from Hausdorff strict Berkovich analytic spaces to quasi-separated rigid
+  analytic spaces is fully faithful;
+- it restricts to an equivalence from paracompact strict Berkovich analytic spaces to
+  quasi-separated rigid analytic spaces admitting an admissible affinoid cover of finite type;
+- a cover is of finite type when each member meets only finitely many other members.
 
-Before proof work starts on the global comparison, choose a precise source and mirror its
-conventions. In particular, verify:
+Berkovich's standing convention makes every paracompact space Hausdorff. Since Mathlib's
+`ParacompactSpace` does not include `T2Space`, `BerkovichSpace.IsParacompact` records both. Goodness
+is not a hypothesis of Theorem 1.6.1 and is therefore absent from `berkovichComparisonProperty`.
+Likewise, local affinoidness belongs to the definition of the rigid category and is absent from
+`rigidComparisonProperty`. The former `separated_iff_hausdorff` target has been removed: Theorem
+1.6.1 identifies Hausdorff Berkovich spaces with quasi-separated rigid spaces and does not state that
+rigid separatedness corresponds to Hausdorffness.
 
-- whether `good` is an assumption or follows from the chosen atlas convention;
-- the exact rigid condition corresponding to Berkovich paracompactness;
-- whether quasi-separatedness is independent or built into that condition;
-- whether the base field must be nontrivially valued;
-- whether Hausdorff/separated objects form the main equivalence or a restricted corollary.
-
-Until these are settled, the comparison declarations are useful dependency targets rather than a
-canonical theorem statement. The comparator nevertheless constrains provisional global-space
-implementations through point and affinoid-domain APIs, geometric characterizations of each object
-property, invariance under analytic isomorphism, affinoid examples, and explicit nonvacuity and
-nontriviality of both comparison subcategories. This rules out the empty/trivial-category shortcut
-and forces constant-predicate implementations to satisfy concrete geometric characterizations.
+The comparator constrains global-space implementations through point and affinoid-domain APIs,
+geometric characterizations of each object property, invariance under analytic isomorphism,
+affinoid examples, the canonical functor and its affinoid compatibility, and explicit nonvacuity and
+nontriviality of both comparison subcategories.
 
 ## Proposed file layout after the API stabilizes
 
