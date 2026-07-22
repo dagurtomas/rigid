@@ -35,7 +35,8 @@ noncomputable def residueNormedCommRing (n : ℕ)
     e.symm.toRingHom e.symm.injective
 
 /-- The residue norm makes the target a normed algebra over the ground field. -/
-noncomputable instance residueNormedAlgebra (n : ℕ)
+@[reducible]
+noncomputable def residueNormedAlgebra (n : ℕ)
     (I : Ideal (TateAlgebra K (Fin n)))
     (e : (TateAlgebra K (Fin n) ⧸ I) ≃ₐ[K] A) :
     letI := residueNormedCommRing K A n I e

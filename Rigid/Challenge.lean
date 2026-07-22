@@ -313,7 +313,8 @@ noncomputable def residueNormedCommRing (P : AffinoidPresentation K A) :
     NormedCommRing A := sorry
 
 /-- The residue norm makes the target a normed algebra over the ground field. -/
-noncomputable instance residueNormedAlgebra (P : AffinoidPresentation K A) :
+@[reducible]
+noncomputable def residueNormedAlgebra (P : AffinoidPresentation K A) :
     letI := P.residueNormedCommRing
     NormedAlgebra K A := sorry
 
@@ -1883,6 +1884,8 @@ theorem continuous_spectrumComap {A : Type v} {B : Type w}
     (hA : IsAffinoidAlgebra K A) (hB : IsAffinoidAlgebra K B) (f : A →ₐ[K] B) :
     letI : NormedCommRing A := hA.presentation.residueNormedCommRing K A
     letI : NormedCommRing B := hB.presentation.residueNormedCommRing K B
+    letI : NormedAlgebra K A := hA.presentation.residueNormedAlgebra K A
+    letI : NormedAlgebra K B := hB.presentation.residueNormedAlgebra K B
     Continuous (spectrumComap K hA hB f) := sorry
 
 /-- The morphism of affinoid Berkovich spaces induced contravariantly by an algebra homomorphism. -/
