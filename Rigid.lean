@@ -18,6 +18,7 @@ import Rigid.TateAlgebra.Division
 import Rigid.TateAlgebra.GaussNorm
 import Rigid.TateAlgebra.Leading
 import Rigid.TateAlgebra.Multiplicative
-import Rigid.TateAlgebra.NormedRing
 import Rigid.TateAlgebra.Noetherian
+import Rigid.TateAlgebra.NormedRing
+import Rigid.TateAlgebra.PowerBoundedUniversalProperty
 import Rigid.TateAlgebra.UniversalProperty
