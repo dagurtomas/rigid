@@ -12,6 +12,7 @@ import Rigid.AffinoidAlgebra.RationalDatum
 import Rigid.TateAlgebra.Complete
 import Rigid.TateAlgebra.Noetherian
 import Rigid.TateAlgebra.Multiplicative
+import Rigid.TateAlgebra.PowerBoundedUniversalProperty
 import Rigid.TateAlgebra.UniversalProperty
 
 set_option linter.style.header false
@@ -110,7 +111,8 @@ theorem coeff_zero_algebraMap (r : K) :
 /-- Every nonconstant coefficient of a scalar in the Tate algebra vanishes. -/
 @[simp]
 theorem coeff_algebraMap_of_ne_zero (r : K) {n : ι →₀ ℕ} (hn : n ≠ 0) :
-    MvPowerSeries.coeff n (algebraMap K (TateAlgebra K ι) r).1 = 0 := sorry
+    MvPowerSeries.coeff n (algebraMap K (TateAlgebra K ι) r).1 = 0 :=
+  MvPowerSeries.coeff_C_of_ne_zero hn r
 
 variable [hι : Finite ι]
 
@@ -290,7 +292,8 @@ theorem existsUnique_continuousAlgHom_of_isPowerBounded
     {A : Type w} [NormedCommRing A] [NormedAlgebra K A] [CompleteSpace A]
     [IsUltrametricDist A] (x : ι → A) (hx : ∀ i, IsPowerBounded (x i)) :
     ∃! φ : ContinuousAlgHom K (TateAlgebra K ι) A,
-      ∀ i, φ (tateVariable K ι i) = x i := sorry
+      ∀ i, φ (tateVariable K ι i) = x i :=
+  Rigid.existsUnique_continuousAlgHom_of_isPowerBounded x hx
 
 /-- The numerator and denominator of a rational localization form a rational datum when together
 they generate the unit ideal. -/
