@@ -3,6 +3,7 @@ import Rigid.AffinoidAlgebra.AutomaticContinuity
 import Rigid.AffinoidAlgebra.Basic
 import Rigid.Berkovich.Nonempty
 import Rigid.Berkovich.RelativeSpectrum
+import Rigid.Berkovich.RelativeNonempty
 import Rigid.Berkovich.CompletedResidue
 import Rigid.AffinoidAlgebra.QuotientNorm
 import Rigid.AffinoidAlgebra.QuotientTopology
@@ -963,7 +964,10 @@ theorem isCompact_univ_berkovichSpectrum (hA : IsAffinoidAlgebra K A) :
 
 /-- The relative Berkovich spectrum of a nonzero affinoid algebra is nonempty. -/
 theorem nonempty_berkovichSpectrumOver [Nontrivial A] (hA : IsAffinoidAlgebra K A) :
-    Nonempty (BerkovichSpectrumOver K A) := sorry
+    Nonempty (BerkovichSpectrumOver K A) := by
+  rcases hA with ⟨_⟩
+  exact (Rigid.BerkovichSpectrumOver.nonempty_of_nontrivial K A).map fun x ↦
+    ⟨⟨x.toBerkovichSpectrum.seminorm, x.toBerkovichSpectrum.le_norm'⟩, x.map_algebraMap'⟩
 
 /-- The relative Berkovich spectrum of an affinoid algebra is compact. -/
 theorem isCompact_univ_berkovichSpectrumOver (hA : IsAffinoidAlgebra K A) :

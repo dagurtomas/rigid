@@ -8,6 +8,7 @@ import Rigid.Berkovich.CompletedResidue
 import Rigid.Berkovich.GeneralSmoothing
 import Rigid.Berkovich.Nonempty
 import Rigid.Berkovich.RelativeSpectrum
+import Rigid.Berkovich.RelativeNonempty
 import Rigid.Development
 import Rigid.TateAlgebra.Basic
 import Rigid.TateAlgebra.Complete

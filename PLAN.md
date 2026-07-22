@@ -116,9 +116,11 @@ geometric objects.
    Completeness is unnecessary.
 3. Develop pointwise evaluation, prime kernels, and contravariance. The basic evaluation, kernel,
    norm-nonincreasing pullback, and nonarchimedeanity APIs are **done**.
-4. Define the relative spectrum over the ground field. **Done** (`Berkovich/RelativeSpectrum`): it
-   is the closed compact Hausdorff subspace where seminorms restrict to the norm on `K`, with
-   continuous contravariant pullback.
+4. Define the relative spectrum over the ground field. **Done** (`Berkovich/RelativeSpectrum`,
+   `Berkovich/RelativeNonempty`): it is the closed compact Hausdorff subspace where seminorms
+   restrict to the norm on `K`, with continuous contravariant pullback. Every unrestricted point on
+   a normed `K`-algebra is automatically relative, so the two spectra are homeomorphic and the
+   relative spectrum is nonempty whenever the algebra is nonzero.
 5. Define completed residue fields and evaluation maps. **Done**
    (`Berkovich/CompletedResidue`): quotient by the prime kernel, extend the valuation to the
    fraction field, complete, and recover the point seminorm as the norm of evaluation.
@@ -178,6 +180,7 @@ Rigid/
   RigidSpace/Gluing.lean
   Berkovich/Spectrum.lean
   Berkovich/RelativeSpectrum.lean
+  Berkovich/RelativeNonempty.lean
   Berkovich/CompletedResidue.lean
   Berkovich/GeneralSmoothing.lean
   Berkovich/Nonempty.lean
