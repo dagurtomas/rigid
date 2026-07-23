@@ -24,6 +24,7 @@ import Rigid.Berkovich.Nonempty
 import Rigid.Berkovich.RationalLocalization
 import Rigid.Berkovich.RelativeNonempty
 import Rigid.Berkovich.RelativeSpectrum
+import Rigid.Berkovich.Space
 import Rigid.Berkovich.SpectralSeminorm
 import Rigid.Berkovich.Spectrum
 import Rigid.Development
