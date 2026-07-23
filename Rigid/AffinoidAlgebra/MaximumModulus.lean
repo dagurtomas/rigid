@@ -49,6 +49,22 @@ def unitBallSubring (n : ℕ) : Subring (TateAlgebra K (Fin n)) where
   mul_mem' {f g} hf hg :=
     (norm_mul_le f g).trans (by simpa using mul_le_mul hf hg (norm_nonneg g) zero_le_one)
 
+/-- Compatibility alias for the finite-variable Gauss point. -/
+noncomputable abbrev gaussPoint (n : ℕ) :
+    BerkovichSpectrumOver K (TateAlgebra K (Fin n)) :=
+  BerkovichSpectrumOver.gaussPoint K (Fin n)
+
+@[simp]
+theorem gaussPoint_apply (n : ℕ) (f : TateAlgebra K (Fin n)) :
+    gaussPoint K n f = ‖f‖ :=
+  BerkovichSpectrumOver.gaussPoint_apply K (Fin n) f
+
+/-- The Gauss point realizes the maximum modulus of every function on a strict Tate algebra. -/
+theorem le_gaussPoint (n : ℕ) (x : BerkovichSpectrumOver K (TateAlgebra K (Fin n)))
+    (f : TateAlgebra K (Fin n)) : x f ≤ gaussPoint K n f := by
+  rw [gaussPoint_apply]
+  exact BerkovichSpectrumOver.le_norm K _ x f
+
 /-- In a finite strict Tate algebra, power-boundedness is equivalent to membership in the Gauss
 unit ball. -/
 theorem isPowerBounded_iff_norm_le_one {n : ℕ} {f : TateAlgebra K (Fin n)} :
