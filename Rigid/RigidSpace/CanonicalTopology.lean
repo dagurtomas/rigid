@@ -1,7 +1,6 @@
 import Rigid.RigidSpace.AdmissibleSite
 
 set_option linter.style.header false
-set_option linter.checkUnivs false
 
 /-!
 # The canonical point-cover G-topology

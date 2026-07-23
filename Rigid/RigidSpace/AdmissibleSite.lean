@@ -2,7 +2,6 @@ import Mathlib.CategoryTheory.Limits.Shapes.Pullback.HasPullback
 import Mathlib.CategoryTheory.Sites.Pretopology
 
 set_option linter.style.header false
-set_option linter.checkUnivs false
 
 /-!
 # Admissible sites
@@ -22,6 +21,7 @@ universe p o
 
 namespace Rigid
 
+set_option linter.checkUnivs false in
 /-- A small family of subsets, closed under the whole set and binary intersections.
 
 The order is inclusion of carriers. In particular, admissible opens are determined by their
@@ -30,7 +30,6 @@ structure AdmissibleBasis where
   Point : Type p
   Open : Type o
   [openPartialOrder : PartialOrder Open]
-  [openHasPullbacks : HasPullbacks Open]
   carrier : Open → Set Point
   le_iff : ∀ {U V}, U ≤ V ↔ carrier U ⊆ carrier V
   top : Open
@@ -38,7 +37,7 @@ structure AdmissibleBasis where
   inter : Open → Open → Open
   carrier_inter : ∀ U V, carrier (inter U V) = carrier U ∩ carrier V
 
-attribute [instance] AdmissibleBasis.openPartialOrder AdmissibleBasis.openHasPullbacks
+attribute [instance] AdmissibleBasis.openPartialOrder
 
 namespace AdmissibleBasis
 
@@ -83,18 +82,24 @@ def interPullbackConeIsLimit {U V W : B.Open} (f : U ⟶ W) (g : V ⟶ W) :
     (fun _ ↦ Subsingleton.elim _ _) (fun _ ↦ Subsingleton.elim _ _)
     (fun _ _ _ _ ↦ Subsingleton.elim _ _)
 
-/-- The canonical pullback instance supplied by intersections.  Constructors of an
-`AdmissibleBasis` can use this as their `openHasPullbacks` field. -/
+/-- The canonical pullback instance supplied by intersections. -/
 theorem hasPullbackOfInter {U V W : B.Open} (f : U ⟶ W) (g : V ⟶ W) :
     HasPullback f g where
   exists_limit := ⟨⟨B.interPullbackCone f g, B.interPullbackConeIsLimit f g⟩⟩
 
+instance openHasPullbacks : HasPullbacks B.Open := by
+  letI : ∀ {U V W : B.Open} {f : U ⟶ W} {g : V ⟶ W}, HasPullback f g :=
+    fun {_ _ _} {f g} ↦ B.hasPullbackOfInter f g
+  exact hasPullbacks_of_hasLimit_cospan B.Open
+
 end AdmissibleBasis
 
+set_option linter.checkUnivs false in
 /-- A G-site: an admissible basis, a pretopology on it, and the assertion that pretopology
 coverings cover the underlying point set. -/
 structure AdmissibleSite extends AdmissibleBasis.{p, o} where
-  pretopology : Pretopology toAdmissibleBasis.Open
+  pretopology : @Pretopology toAdmissibleBasis.Open _
+    (AdmissibleBasis.openHasPullbacks toAdmissibleBasis)
   precover_covers :
     ∀ {U : toAdmissibleBasis.Open} {R : Presieve U}, R ∈ pretopology U →
       ∀ x ∈ toAdmissibleBasis.carrier U,
