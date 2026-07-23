@@ -8,8 +8,8 @@ import Rigid.AffinoidAlgebra.QuotientNorm
 import Rigid.AffinoidAlgebra.QuotientTopology
 import Rigid.AffinoidAlgebra.RationalDatum
 import Rigid.AffinoidAlgebra.RationalLocalization
-import Rigid.AffinoidAlgebra.ResidueNorm
 import Rigid.AffinoidAlgebra.RelativeTate
+import Rigid.AffinoidAlgebra.ResidueNorm
 import Rigid.AffinoidSpectrum.RationalBasis
 import Rigid.Berkovich.AffinoidDomain
 import Rigid.Berkovich.CompletedResidue
