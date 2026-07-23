@@ -1,5 +1,6 @@
 import Mathlib.Analysis.Normed.Group.Ultra
 import Mathlib.Analysis.Normed.Operator.Banach
+import Mathlib.RingTheory.IntegralClosure.IsIntegral.Basic
 import Rigid.AffinoidAlgebra.RationalDatum
 
 set_option linter.style.header false
@@ -13,6 +14,8 @@ Berkovich spectral seminorm foundations and by future affinoid power-bounded arg
 
 universe u v w
 
+open scoped BigOperators
+
 namespace Rigid
 
 section SeminormedRing
@@ -25,6 +28,19 @@ theorem IsPowerBounded.pow {x : B} (hx : IsPowerBounded x) (n : ℕ) :
   refine ⟨M, ?_⟩
   rintro _ ⟨m, rfl⟩
   simpa [pow_mul] using hM ⟨n * m, rfl⟩
+
+/-- Power-boundedness is unchanged by negation. -/
+theorem IsPowerBounded.neg {x : B} (hx : IsPowerBounded x) : IsPowerBounded (-x) := by
+  rcases hx with ⟨M, hM⟩
+  refine ⟨M, ?_⟩
+  rintro _ ⟨n, rfl⟩
+  change ‖(-x) ^ n‖ ≤ M
+  rw [neg_pow]
+  rcases neg_one_pow_eq_or B n with hn | hn
+  · rw [hn, one_mul]
+    exact hM ⟨n, rfl⟩
+  · rw [hn, neg_one_mul, norm_neg]
+    exact hM ⟨n, rfl⟩
 
 end SeminormedRing
 
@@ -110,8 +126,51 @@ theorem IsPowerBounded.add {x y : B} (hx : IsPowerBounded x) (hy : IsPowerBounde
       · exact hx ⟨m, rfl⟩
       · exact hy ⟨n - m, rfl⟩
 
+/-- The power-bounded elements form a subring. -/
+def IsPowerBounded.subring (B : Type u) [SeminormedCommRing B] [IsUltrametricDist B] :
+    Subring B where
+  carrier := {x | IsPowerBounded x}
+  zero_mem' := isPowerBounded_zero
+  one_mem' := isPowerBounded_one
+  add_mem' := IsPowerBounded.add
+  neg_mem' := IsPowerBounded.neg
+  mul_mem' := IsPowerBounded.mul
 
 end Ultrametric
+
+section Integral
+
+variable {B : Type u} [NormedCommRing B]
+
+/-- An element integral over a uniformly bounded coefficient subring is power-bounded. -/
+theorem IsPowerBounded.of_isIntegral_over_bounded_subring (S : Subring B)
+    (hS : BddAbove (Set.range fun s : S ↦ ‖(s : B)‖)) {x : B} (hx : IsIntegral S x) :
+    IsPowerBounded x := by
+  obtain ⟨C, hC⟩ := hS
+  obtain ⟨d, v, hv⟩ :=
+    Submodule.fg_iff_exists_fin_generating_family.mp hx.fg_adjoin_singleton
+  let D : ℝ := ∑ i, ‖v i‖
+  refine ⟨max 0 C * D, ?_⟩
+  rintro _ ⟨n, rfl⟩
+  have hxpow : x ^ n ∈ Algebra.adjoin S {x} :=
+    (Algebra.adjoin S {x}).pow_mem (Algebra.subset_adjoin (Set.mem_singleton x)) n
+  have hxspan : x ^ n ∈ Submodule.span S (Set.range v) := by
+    rw [hv]
+    exact hxpow
+  obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun S).mp hxspan
+  change ‖x ^ n‖ ≤ max 0 C * D
+  rw [← hc]
+  calc
+    ‖∑ i, c i • v i‖ ≤ ∑ i, ‖c i • v i‖ := norm_sum_le _ _
+    _ ≤ ∑ i, max 0 C * ‖v i‖ := by
+      apply Finset.sum_le_sum
+      intro i _
+      change ‖(c i : B) * v i‖ ≤ max 0 C * ‖v i‖
+      exact (norm_mul_le _ _).trans <| mul_le_mul_of_nonneg_right
+        ((hC ⟨c i, rfl⟩).trans (le_max_right 0 C)) (norm_nonneg _)
+    _ = max 0 C * D := by rw [Finset.mul_sum]
+
+end Integral
 
 section ContinuousAlgHom
 

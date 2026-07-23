@@ -2,6 +2,7 @@ import Rigid.AffinoidAlgebra.AutomaticContinuity
 import Rigid.AffinoidAlgebra.BanachRealization
 import Rigid.AffinoidAlgebra.Basic
 import Rigid.AffinoidAlgebra.MaximalSpectrum
+import Rigid.AffinoidAlgebra.MaximumModulus
 import Rigid.AffinoidAlgebra.NoetherNormalization
 import Rigid.AffinoidAlgebra.NoetherianBanach
 import Rigid.AffinoidAlgebra.PowerBounded
@@ -9,9 +10,11 @@ import Rigid.AffinoidAlgebra.QuotientNorm
 import Rigid.AffinoidAlgebra.QuotientTopology
 import Rigid.AffinoidAlgebra.RationalDatum
 import Rigid.AffinoidAlgebra.RationalLocalization
+import Rigid.AffinoidAlgebra.RationalRestriction
 import Rigid.AffinoidAlgebra.RelativeTate
 import Rigid.AffinoidAlgebra.ResidueNorm
 import Rigid.AffinoidSpectrum.RationalBasis
+import Rigid.AffinoidSpectrum.RationalCover
 import Rigid.Berkovich.AffinoidDomain
 import Rigid.Berkovich.CompletedResidue
 import Rigid.Berkovich.CompletedResidueFunctoriality
