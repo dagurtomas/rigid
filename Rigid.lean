@@ -3,6 +3,7 @@ import Rigid.AffinoidAlgebra.BanachRealization
 import Rigid.AffinoidAlgebra.Basic
 import Rigid.AffinoidAlgebra.ClosedIdeals
 import Rigid.AffinoidAlgebra.CompletedLaurent
+import Rigid.AffinoidAlgebra.CompletedLaurentRelation
 import Rigid.AffinoidAlgebra.FiniteExtensionFunctional
 import Rigid.AffinoidAlgebra.FiniteModuleBounded
 import Rigid.AffinoidAlgebra.LaurentCharts
